@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      diagnoses: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          scores: Json
+          top_codes: string[]
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          scores?: Json
+          top_codes?: string[]
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          scores?: Json
+          top_codes?: string[]
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string
+          created_at: string
+          display_name: string
+          holland_code: string
+          id: string
+          rating: number
+        }
+        Insert: {
+          comment?: string
+          created_at?: string
+          display_name: string
+          holland_code?: string
+          id?: string
+          rating?: number
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          display_name?: string
+          holland_code?: string
+          id?: string
+          rating?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
