@@ -416,7 +416,7 @@ export function normalize(scores: Scores): { key: RiasecKey; value: number; labe
   return RIASEC_KEYS.map((k) => ({
     key: k,
     value: Math.round((scores[k] / max) * 100),
-    label: TYPES[k].title.split(" ")[0],
+    label: TYPES[k].title.split(" ")[0] ?? TYPES[k].key,
   }));
 }
 
