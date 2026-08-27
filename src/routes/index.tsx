@@ -1,13 +1,16 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Brain, Sparkles, Star, ShieldCheck, Timer, ArrowLeft } from "lucide-react";
+import { Brain, Sparkles, Star, FileText, Timer, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { BrandHeader, SiteFooter } from "@/components/brand";
 import { STORAGE_KEY } from "@/lib/riasec";
 import { toast } from "sonner";
+import brainAsset from "@/assets/brain-icon.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,12 +19,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "20 שאלות, ניתוח בינה מלאכותית ודוח אישי עם כיווני קריירה מותאמים לציבור החרדי. חינם ובעברית מלאה.",
+          "20 שאלות, ניתוח בינה מלאכותית ודוח אישי עם כיווני קריירה מותאמים לציבור החרדי. בעברית מלאה.",
       },
       { property: "og:title", content: "אבחון תעסוקתי חכם למגזר החרדי" },
       {
         property: "og:description",
-        content: "מודל RIASEC בשילוב AI - גלה את הכיוון התעסוקתי שמתאים לך באמת.",
+        content: "מצפן אישי בשילוב AI - גלה את הכיוון התעסוקתי שמתאים לך באמת.",
       },
     ],
   }),
@@ -33,10 +36,29 @@ interface UserInfo {
   email: string;
 }
 
+const FEATURES = [
+  {
+    icon: Sparkles,
+    title: "ניתוח AI חכם",
+    text: "הקלידו תשובות חופשיות והבינה המלאכותית שלנו תדע לנתח את האישיות שלכם.",
+  },
+  {
+    icon: Brain,
+    title: "מותאם אישית",
+    text: "אפשרות לבחור מספר תשובות בכל השאלות כדי לשקף מורכבות אישית, וביטול בחירה פשוט.",
+  },
+  {
+    icon: FileText,
+    title: "דוח מפורט",
+    text: "בסיום תקבלו מפת אישיות מקיפה והמלצות קריירה מדויקות להורדה ושיתוף.",
+  },
+];
+
 function Home() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [hasProgress, setHasProgress] = useState(false);
 
   useEffect(() => {
@@ -62,7 +84,8 @@ function Home() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("reviews")
-        .select("id, display_name, rating, comment, holland_code, created_at")
+        .select("id, display_name, rating, comment, created_at")
+        .gte("rating", 4)
         .order("created_at", { ascending: false })
         .limit(12);
       if (error) throw error;
@@ -88,6 +111,10 @@ function Home() {
       toast.error("נא להזין כתובת אימייל תקינה");
       return;
     }
+    if (!agreed) {
+      toast.error("יש לאשר את תנאי השימוש ומדיניות הפרטיות");
+      return;
+    }
     const existing = (() => {
       try {
         return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
@@ -97,7 +124,11 @@ function Home() {
     })();
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ ...existing, user: { name: cleanName, email: cleanEmail } }),
+      JSON.stringify({
+        ...existing,
+        user: { name: cleanName, email: cleanEmail },
+        consentAt: new Date().toISOString(),
+      }),
     );
     navigate({ to: "/quiz" });
   };
@@ -109,9 +140,16 @@ function Home() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-10">
-      <header className="text-center">
-        <div className="glass mx-auto inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary">
+    <main className="mx-auto w-full max-w-3xl px-4 pb-16">
+      <BrandHeader />
+
+      <header className="mt-4 text-center">
+        <img
+          src={brainAsset.url}
+          alt="סמל אבחון מבוסס בינה מלאכותית"
+          className="mx-auto h-24 w-24 drop-shadow-[0_18px_45px_oklch(0.82_0.135_190/45%)]"
+        />
+        <div className="glass mx-auto mt-6 inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary">
           <Sparkles className="h-4 w-4" />
           אבחון מבוסס מודל RIASEC + בינה מלאכותית
         </div>
@@ -121,21 +159,24 @@ function Home() {
           שבאמת מתאים לך
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
-          20 שאלות קצרות, ניתוח חכם של התשובות החופשיות שלך, ודוח אישי עם קוד הולנד מלא
-          ורשימת מקצועות מסוננת ומותאמת לאורח החיים שלנו.
+          20 שאלות קצרות, ניתוח חכם של התשובות שלך, ודוח אישי - מצפן שעוזר לך להבין לאן ללכת,
+          עם רשימת מקצועות מסוננת ומותאמת לאורח החיים שלנו.
         </p>
+        <div className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Timer className="h-3.5 w-3.5" />
+          כ-7 דקות
+        </div>
       </header>
 
-      <section className="mt-8 grid grid-cols-3 gap-3 text-center">
-        {[
-          { icon: Timer, label: "7 דקות" },
-          { icon: Brain, label: "ניתוח AI" },
-          { icon: ShieldCheck, label: "תוכן מותאם" },
-        ].map(({ icon: Icon, label }) => (
-          <div key={label} className="glass px-2 py-4">
-            <Icon className="mx-auto h-5 w-5 text-primary" />
-            <div className="mt-2 text-xs font-medium sm:text-sm">{label}</div>
-          </div>
+      <section className="mt-10 grid gap-3 sm:grid-cols-3">
+        {FEATURES.map(({ icon: Icon, title, text }) => (
+          <article key={title} className="glass p-5">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15">
+              <Icon className="h-5 w-5 text-primary" />
+            </span>
+            <h2 className="mt-3 text-sm font-bold">{title}</h2>
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{text}</p>
+          </article>
         ))}
       </section>
 
@@ -169,7 +210,26 @@ function Home() {
               className="h-12 bg-white/5 text-right"
             />
           </div>
-          <Button variant="hero" size="xl" className="w-full" onClick={start}>
+          <div className="flex items-start gap-3 rounded-2xl border border-border bg-white/5 p-4">
+            <Checkbox
+              id="consent"
+              checked={agreed}
+              onCheckedChange={(v) => setAgreed(v === true)}
+              className="mt-0.5"
+            />
+            <Label htmlFor="consent" className="text-xs font-normal leading-relaxed">
+              קראתי ואני מאשר/ת את{" "}
+              <Link to="/terms" className="text-primary underline underline-offset-4">
+                תנאי השימוש
+              </Link>{" "}
+              ואת{" "}
+              <Link to="/privacy" className="text-primary underline underline-offset-4">
+                מדיניות הפרטיות ואבטחת המידע
+              </Link>
+              , ומסכים/ה לעיבוד תשובותיי לצורך הפקת הדוח האישי ולשליחתו למייל שלי.
+            </Label>
+          </div>
+          <Button variant="hero" size="xl" className="w-full" disabled={!agreed} onClick={start}>
             {hasProgress ? "המשך מהמקום שעצרתי" : "מתחילים באבחון"}
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -204,11 +264,6 @@ function Home() {
                 </span>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{r.comment}</p>
-              {r.holland_code && (
-                <span className="mt-3 inline-block rounded-lg bg-primary/15 px-2 py-1 text-[11px] font-semibold text-primary">
-                  קוד הולנד: {r.holland_code}
-                </span>
-              )}
             </article>
           ))}
           {reviews.isLoading && (
@@ -216,6 +271,8 @@ function Home() {
           )}
         </div>
       </section>
+
+      <SiteFooter />
     </main>
   );
 }
