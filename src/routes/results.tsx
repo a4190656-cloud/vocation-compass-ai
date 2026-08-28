@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { BrandHeader, SiteFooter } from "@/components/brand";
 import {
   RESULT_KEY,
   TYPES,
@@ -26,10 +27,10 @@ import {
 export const Route = createFileRoute("/results")({
   head: () => ({
     meta: [
-      { title: "הדוח האישי שלי | התובנה הרגשית" },
+      { title: "המצפן האישי שלי | התובנה הרגשית" },
       {
         name: "description",
-        content: "קוד הולנד האישי, גרף נטיות תעסוקתיות ורשימת מקצועות מותאמים לאורח החיים החרדי.",
+        content: "המצפן האישי שלך: גרף נטיות תעסוקתיות ורשימת מקצועות מותאמים לאורח החיים החרדי.",
       },
       { property: "og:title", content: "דוח אבחון תעסוקתי אישי" },
       {
@@ -77,7 +78,7 @@ function Results() {
   const careers = recommendedCareers(result.top);
   const main = result.top[0] ? TYPES[result.top[0]] : null;
 
-  const shareText = `עשיתי אבחון תעסוקתי חכם וקיבלתי קוד הולנד ${result.code} - ${main?.title ?? ""}. שווה לנסות!`;
+  const shareText = `עשיתי אבחון תעסוקתי חכם וקיבלתי מצפן אישי - ${main?.title ?? ""}. שווה לנסות!`;
 
   const submitReview = async () => {
     const name = displayName.trim();
@@ -100,15 +101,19 @@ function Results() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-10">
+    <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-2">
+      <BrandHeader />
       <header className="text-center">
         <p className="text-sm text-muted-foreground">
           {result.user?.name ? `${result.user.name}, הנה הדוח שלך` : "הדוח האישי שלך"}
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-black">
-          קוד הולנד: <span className="text-gradient">{result.code}</span>
+          <span className="text-gradient">מצפן</span> — עוזר לי להבין לאן ללכת
         </h1>
-        {main && <p className="mt-3 text-base text-muted-foreground">{main.description}</p>}
+        {main && (
+          <p className="mt-3 text-base font-semibold text-primary">{main.title}</p>
+        )}
+        {main && <p className="mt-2 text-base text-muted-foreground">{main.description}</p>}
       </header>
 
       <section className="glass-strong mt-8 p-4 sm:p-6">
@@ -245,6 +250,7 @@ function Results() {
           חזרה לדף הבית
         </Link>
       </div>
+      <SiteFooter />
     </main>
   );
 }
