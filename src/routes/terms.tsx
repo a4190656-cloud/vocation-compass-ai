@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BrandHeader, SiteFooter } from "@/components/brand";
+import { BrandHeader, ContactCard, SiteFooter } from "@/components/brand";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -102,6 +102,7 @@ function Terms() {
           </section>
         ))}
       </div>
+      <ContactCard />
       <SiteFooter />
     </main>
   );

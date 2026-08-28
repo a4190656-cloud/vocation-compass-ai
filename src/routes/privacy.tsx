@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BrandHeader, SiteFooter } from "@/components/brand";
+import { BrandHeader, ContactCard, SiteFooter } from "@/components/brand";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -102,6 +102,7 @@ function Privacy() {
           </section>
         ))}
       </div>
+      <ContactCard />
       <SiteFooter />
     </main>
   );
