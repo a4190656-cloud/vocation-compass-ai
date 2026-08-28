@@ -77,7 +77,7 @@ function Results() {
   const careers = recommendedCareers(result.top);
   const main = result.top[0] ? TYPES[result.top[0]] : null;
 
-  const shareText = `עשיתי אבחון תעסוקתי חכם וקיבלתי קוד הולנד ${result.code} - ${main?.title ?? ""}. שווה לנסות!`;
+  const shareText = `עשיתי אבחון תעסוקתי חכם וקיבלתי מצפן אישי - ${main?.title ?? ""}. שווה לנסות!`;
 
   const submitReview = async () => {
     const name = displayName.trim();
@@ -106,9 +106,12 @@ function Results() {
           {result.user?.name ? `${result.user.name}, הנה הדוח שלך` : "הדוח האישי שלך"}
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-black">
-          קוד הולנד: <span className="text-gradient">{result.code}</span>
+          <span className="text-gradient">מצפן</span> — עוזר לי להבין לאן ללכת
         </h1>
-        {main && <p className="mt-3 text-base text-muted-foreground">{main.description}</p>}
+        {main && (
+          <p className="mt-3 text-base font-semibold text-primary">{main.title}</p>
+        )}
+        {main && <p className="mt-2 text-base text-muted-foreground">{main.description}</p>}
       </header>
 
       <section className="glass-strong mt-8 p-4 sm:p-6">
