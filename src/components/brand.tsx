@@ -18,7 +18,9 @@ export function BrandHeader() {
           <span className="block font-[family-name:var(--font-display)] text-sm font-black">
             מצפן
           </span>
-          <span className="block text-[11px] text-muted-foreground">אבחון תעסוקתי חכם</span>
+          <span className="block text-[11px] text-muted-foreground">
+            עוזר לי להבין לאן ללכת
+          </span>
         </span>
       </Link>
       <img
