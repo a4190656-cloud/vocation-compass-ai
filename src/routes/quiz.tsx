@@ -28,7 +28,7 @@ export const Route = createFileRoute("/quiz")({
         content:
           "שאלון קצר לגילוי הנטיות התעסוקתיות שלך, עם אפשרות להוסיף תשובה חופשית שמנותחת בבינה מלאכותית.",
       },
-      { property: "og:title", content: "שאלון אבחון תעסוקתי RIASEC" },
+      { property: "og:title", content: "שאלון אבחון תעסוקתי אישי" },
       {
         property: "og:description",
         content: "ענה בקצב שלך - ההתקדמות נשמרת אוטומטית במכשיר שלך.",

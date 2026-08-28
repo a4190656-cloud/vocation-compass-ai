@@ -35,7 +35,7 @@ export const Route = createFileRoute("/results")({
       { property: "og:title", content: "דוח אבחון תעסוקתי אישי" },
       {
         property: "og:description",
-        content: "תוצאות מודל RIASEC בשילוב ניתוח בינה מלאכותית.",
+        content: "מפת נטיות תעסוקתיות אישית בשילוב ניתוח בינה מלאכותית.",
       },
     ],
   }),
