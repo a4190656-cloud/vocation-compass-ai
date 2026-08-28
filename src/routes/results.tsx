@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { BrandHeader, SiteFooter } from "@/components/brand";
 import {
   RESULT_KEY,
   TYPES,
@@ -100,7 +101,8 @@ function Results() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-10">
+    <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-2">
+      <BrandHeader />
       <header className="text-center">
         <p className="text-sm text-muted-foreground">
           {result.user?.name ? `${result.user.name}, הנה הדוח שלך` : "הדוח האישי שלך"}
