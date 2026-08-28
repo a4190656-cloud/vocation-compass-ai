@@ -250,6 +250,7 @@ function Results() {
           חזרה לדף הבית
         </Link>
       </div>
+      <SiteFooter />
     </main>
   );
 }
