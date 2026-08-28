@@ -15,7 +15,7 @@ import brainAsset from "@/assets/brain-icon.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "אבחון תעסוקתי חכם | התובנה הרגשית" },
+      { title: "אבחון תעסוקתי חכם | מצפן" },
       {
         name: "description",
         content:

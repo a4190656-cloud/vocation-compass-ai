@@ -4,7 +4,7 @@ import { BrandHeader, SiteFooter } from "@/components/brand";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "תנאי שימוש | התובנה הרגשית" },
+      { title: "תנאי שימוש | מצפן" },
       {
         name: "description",
         content:

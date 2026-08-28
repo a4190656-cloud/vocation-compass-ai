@@ -16,7 +16,7 @@ export function BrandHeader() {
         </span>
         <span className="leading-tight">
           <span className="block font-[family-name:var(--font-display)] text-sm font-black">
-            התובנה הרגשית
+            מצפן
           </span>
           <span className="block text-[11px] text-muted-foreground">אבחון תעסוקתי חכם</span>
         </span>
@@ -52,7 +52,7 @@ export function SiteFooter() {
         </Link>
       </nav>
       <p className="mt-4 text-[11px] text-muted-foreground">
-        © {new Date().getFullYear()} התובנה הרגשית · כל הזכויות שמורות
+        © {new Date().getFullYear()} מצפן · כל הזכויות שמורות
       </p>
     </footer>
   );

@@ -27,7 +27,7 @@ import {
 export const Route = createFileRoute("/results")({
   head: () => ({
     meta: [
-      { title: "המצפן האישי שלי | התובנה הרגשית" },
+      { title: "המצפן האישי שלי | מצפן" },
       {
         name: "description",
         content: "המצפן האישי שלך: גרף נטיות תעסוקתיות ורשימת מקצועות מותאמים לאורח החיים החרדי.",

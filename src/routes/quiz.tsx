@@ -22,7 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/quiz")({
   head: () => ({
     meta: [
-      { title: "שאלון האבחון | התובנה הרגשית" },
+      { title: "שאלון האבחון | מצפן" },
       {
         name: "description",
         content:
