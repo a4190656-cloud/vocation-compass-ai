@@ -15,7 +15,7 @@ import brainAsset from "@/assets/brain-icon.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "אבחון תעסוקתי חכם | התובנה הרגשית" },
+      { title: "אבחון תעסוקתי חכם | מצפן" },
       {
         name: "description",
         content:
@@ -151,7 +151,7 @@ function Home() {
         />
         <div className="glass mx-auto mt-6 inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary">
           <Sparkles className="h-4 w-4" />
-          אבחון מבוסס מודל RIASEC + בינה מלאכותית
+          אבחון נטיות תעסוקתיות בשילוב בינה מלאכותית
         </div>
         <h1 className="mt-6 font-[family-name:var(--font-display)] text-4xl font-black leading-tight sm:text-5xl">
           <span className="text-gradient">גלה את הכיוון התעסוקתי</span>

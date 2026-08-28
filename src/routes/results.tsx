@@ -27,7 +27,7 @@ import {
 export const Route = createFileRoute("/results")({
   head: () => ({
     meta: [
-      { title: "המצפן האישי שלי | התובנה הרגשית" },
+      { title: "המצפן האישי שלי | מצפן" },
       {
         name: "description",
         content: "המצפן האישי שלך: גרף נטיות תעסוקתיות ורשימת מקצועות מותאמים לאורח החיים החרדי.",
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/results")({
       { property: "og:title", content: "דוח אבחון תעסוקתי אישי" },
       {
         property: "og:description",
-        content: "תוצאות מודל RIASEC בשילוב ניתוח בינה מלאכותית.",
+        content: "מפת נטיות תעסוקתיות אישית בשילוב ניתוח בינה מלאכותית.",
       },
     ],
   }),

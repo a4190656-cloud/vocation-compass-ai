@@ -22,13 +22,13 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/quiz")({
   head: () => ({
     meta: [
-      { title: "שאלון האבחון | התובנה הרגשית" },
+      { title: "שאלון האבחון | מצפן" },
       {
         name: "description",
         content:
           "שאלון קצר לגילוי הנטיות התעסוקתיות שלך, עם אפשרות להוסיף תשובה חופשית שמנותחת בבינה מלאכותית.",
       },
-      { property: "og:title", content: "שאלון אבחון תעסוקתי RIASEC" },
+      { property: "og:title", content: "שאלון אבחון תעסוקתי אישי" },
       {
         property: "og:description",
         content: "ענה בקצב שלך - ההתקדמות נשמרת אוטומטית במכשיר שלך.",

@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BrandHeader, SiteFooter } from "@/components/brand";
+import { BrandHeader, ContactCard, SiteFooter } from "@/components/brand";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "מדיניות פרטיות ואבטחת מידע | התובנה הרגשית" },
+      { title: "מדיניות פרטיות ואבטחת מידע | מצפן" },
       {
         name: "description",
         content:
@@ -102,6 +102,7 @@ function Privacy() {
           </section>
         ))}
       </div>
+      <ContactCard />
       <SiteFooter />
     </main>
   );

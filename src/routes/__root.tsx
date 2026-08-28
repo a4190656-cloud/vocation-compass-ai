@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "אבחון תעסוקתי חכם למגזר החרדי" },
       {
         name: "description",
-        content: "אבחון נטיות תעסוקתיות לפי מודל RIASEC בשילוב בינה מלאכותית, מותאם לציבור החרדי.",
+        content: "אבחון נטיות תעסוקתיות בשילוב בינה מלאכותית, מותאם לציבור החרדי.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

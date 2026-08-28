@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BrandHeader, SiteFooter } from "@/components/brand";
+import { BrandHeader, ContactCard, SiteFooter } from "@/components/brand";
 
 export const Route = createFileRoute("/accessibility")({
   head: () => ({
     meta: [
-      { title: "הצהרת נגישות | התובנה הרגשית" },
+      { title: "הצהרת נגישות | מצפן" },
       {
         name: "description",
         content:
@@ -78,6 +78,7 @@ function Accessibility() {
           </section>
         ))}
       </div>
+      <ContactCard />
       <SiteFooter />
     </main>
   );

@@ -16,9 +16,11 @@ export function BrandHeader() {
         </span>
         <span className="leading-tight">
           <span className="block font-[family-name:var(--font-display)] text-sm font-black">
-            התובנה הרגשית
+            מצפן
           </span>
-          <span className="block text-[11px] text-muted-foreground">אבחון תעסוקתי חכם</span>
+          <span className="block text-[11px] text-muted-foreground">
+            עוזר לי להבין לאן ללכת
+          </span>
         </span>
       </Link>
       <img
@@ -52,8 +54,43 @@ export function SiteFooter() {
         </Link>
       </nav>
       <p className="mt-4 text-[11px] text-muted-foreground">
-        © {new Date().getFullYear()} התובנה הרגשית · כל הזכויות שמורות
+        © {new Date().getFullYear()} מצפן · כל הזכויות שמורות
       </p>
     </footer>
+  );
+}
+
+export const OWNER = {
+  name: "מצפן - אבחון תעסוקתי חכם",
+  email: "a4190656@gmail.com",
+  phone: "0534190656",
+};
+
+export function ContactCard() {
+  return (
+    <section className="glass-strong mt-6 p-5">
+      <h2 className="text-lg font-bold text-primary">פרטי הפעילות ויצירת קשר</h2>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        בעל השירות ואחראי הגנת הפרטיות והנגישות: {OWNER.name}. לכל פנייה בנושא פרטיות, אבטחת מידע,
+        מימוש זכות עיון, תיקון או מחיקת מידע, וכן פניות נגישות - ניתן ליצור קשר בערוצים הבאים:
+      </p>
+      <ul className="mt-3 space-y-1 text-sm">
+        <li>
+          דוא"ל:{" "}
+          <a href={`mailto:${OWNER.email}`} className="text-primary underline underline-offset-4">
+            {OWNER.email}
+          </a>
+        </li>
+        <li>
+          טלפון / וואטסאפ:{" "}
+          <a href={`tel:${OWNER.phone}`} className="text-primary underline underline-offset-4">
+            {OWNER.phone}
+          </a>
+        </li>
+      </ul>
+      <p className="mt-3 text-xs text-muted-foreground">
+        מענה לפניות יינתן תוך זמן סביר ולא יאוחר מ-30 ימים ממועד קבלת הפנייה.
+      </p>
+    </section>
   );
 }

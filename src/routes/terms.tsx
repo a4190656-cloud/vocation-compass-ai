@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BrandHeader, SiteFooter } from "@/components/brand";
+import { BrandHeader, ContactCard, SiteFooter } from "@/components/brand";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "תנאי שימוש | התובנה הרגשית" },
+      { title: "תנאי שימוש | מצפן" },
       {
         name: "description",
         content:
@@ -24,7 +24,7 @@ const SECTIONS: { title: string; body: string[] }[] = [
   {
     title: "1. מהות השירות",
     body: [
-      "השירות מספק שאלון נטיות תעסוקתיות מבוסס מודל RIASEC בשילוב ניתוח בינה מלאכותית, ומפיק דוח אישי עם כיווני קריירה מותאמים.",
+      "השירות מספק שאלון נטיות תעסוקתיות בשילוב ניתוח בינה מלאכותית, ומפיק דוח אישי עם כיווני קריירה מותאמים.",
       "הדוח הוא כלי הכוונה והעשרה בלבד. אין בו ייעוץ תעסוקתי, פסיכולוגי, רפואי, משפטי או פיננסי, ואינו מחליף אבחון מקצועי מוסמך.",
     ],
   },
@@ -102,6 +102,7 @@ function Terms() {
           </section>
         ))}
       </div>
+      <ContactCard />
       <SiteFooter />
     </main>
   );
