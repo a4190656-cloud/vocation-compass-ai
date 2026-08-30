@@ -1,14 +1,72 @@
-# Welcome to your Lovable project
+# Career Compass AI
+
+אפיון דרישות למפתח: מערכת אבחון תעסוקתי חכם (מודל RIASEC + בינה מלאכותית)
+
+תיאור כללי:
+
+אפליקציית Web (מבוססת SPA) המעבירה משתמשים שאלון נטיות תעסוקתיות, מנתחת את התשובות (כולל ניתוח טקסט חופשי מול API של בינה מלאכותית), ומפיקה דוח תוצאות אישי ומעוצב.
+
+דגש קריטי: המערכת מיועדת לציבור החרדי – התוכן, השאלות, סגנונות הבילוי ורשימת המקצועות חייבים להיות מסוננים ומותאמים תרבותית (לדוגמה: ללא מקצועות כמו צבא/משטרה, וללא תכני פנאי שאינם תואמים את המגזר).
+
+עיצוב נדרש: מודרני, מבוסס תצוגה כהה (Dark Mode) בשילוב Glassmorphism (זכוכית חלבית), צבעי טורקיז, תמיכה מלאה במובייל וממשק בעברית (RTL).
+
+פיצ'רים ויכולות נדרשות במערכת:
+
+1. מסך כניסה (Onboarding):
+
+ * איסוף נתוני חובה: שם משתמש וכתובת אימייל. השם ישמש לפרסונליזציה של הדוח, והמייל ישמש לשליחת התוצאות בהמשך.
+
+2. מנוע השאלון:
+
+ * מערכת שמריצה שאלון (כ-20 שאלות), עם סרגל התקדמות (Progress Bar).
+
+ * תמיכה בשאלות עם בחירה יחידה ובחירה מרובה.
+
+ * שמירת מצב (Auto-Save מקומי): המערכת חייבת לשמור את התקדמות המשתמש (LocalStorage). אם המשתמש סוגר את הדפדפן וחוזר, עליה להציע לו להמשיך מאותה נקודה.
+
+3. שילוב AI בניתוח תשובות (Core Feature):
+
+ * בכל שאלה קיימת אפשרות בחירה של "אחר (טקסט חופשי)".
+
+ * הזנת טקסט תפתח תיבת טקסט. בעת מעבר שאלה, המערכת תשלח את הטקסט ל-API חיצוני (Endpoint / Webhook) שיחזיר תיוג של התשובה לפי קטגוריות RIASEC.
+
+ * חובה להציג חיווי טעינה (Loader) בזמן ההמתנה לתשובת ה-AI.
+
+4. אלגוריתם שקלול וחישוב מורחב:
+
+ * בסיום השאלון, המערכת תשקלל את כל הבחירות (רגילות + AI) לפי 6 הקטגוריות של מודל הולנד.
+
+ * הרחבת תוצאות: המערכת תזהה ותציג למשתמש את 3 עד 4 הקטגוריות המובילות שלו (ולא רק 2), כדי לספק תמונת עומק מורחבת (קוד הולנד מלא) וכיוונים מגוונים יותר.
+
+5. מסך תוצאות (Dashboard) והנעות לפעולה (CTA):
+
+ * הצגת הטיפוסים המובילים עם הסבר מילולי, ושליפת תחומי תעסוקה מומלצים מתוך מאגר הנתונים בהתאם.
+
+ * הצגת "גרף עכביש" (Radar Chart) של התוצאות.
+
+ * דירוג 5 כוכבים: פופ-אפ או כפתור גדול, בולט ובלתי ניתן לפספוס המבקש מהמשתמש לדרג את האבחון ב-5 כוכבים.
+
+ * הצטרפות לקהילה: כפתור בולט המניע את המשתמש להצטרף לקבוצת העדכונים של המערכת בוואטסאפ.
+
+6. מנגנוני ייצוא, שיתוף ואוטומציה:
+
+ * העתקה לווצאפ: כפתור שאורז את התוצאות להודעת טקסט מעוצבת ומעתיק אותה ללוח (חובה ליישם Fallback למכשירים ישנים/iOS).
+
+ * הפקת דוח PDF: מנגנון המפיק קובץ PDF נקי, ממותג ומסודר של התוצאות (מבוסס מנגנון הדפסה של הדפדפן או ספרייה שעובדת פרפקט עם עברית RTL).
+
+ * אינטגרציית אימיילים (Make.com): בסיום האבחון, הנתונים (פרטי המשתמש + התוצאות) יישלחו אוטומטית באמצעות Webhook למערכת Make.com. המערכת החיצונית תשלח למשתמש את הדוח למייל, כאשר גם בגוף המייל ישולב כפתור בולט לבקשת דירוג 5 כוכבים.
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://vocation-compass-ai.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/f21c5991-05a2-425c-8c46-9c2ceb9032c2).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +78,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
