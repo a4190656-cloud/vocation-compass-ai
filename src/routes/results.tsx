@@ -78,7 +78,27 @@ function Results() {
   const careers = recommendedCareers(result.top);
   const main = result.top[0] ? TYPES[result.top[0]] : null;
 
-  const shareText = `עשיתי אבחון תעסוקתי חכם וקיבלתי מצפן אישי - ${main?.title ?? ""}. שווה לנסות!`;
+  const topTitles = result.top.map((k) => TYPES[k].title);
+  const shareText = [
+    "🧭 *מצפן — עוזר לי להבין לאן ללכת*",
+    "",
+    `סיימתי עכשיו אבחון תעסוקתי חכם${result.user?.name ? ` (${result.user.name})` : ""}, והנה עיקרי הדוח האישי שקיבלתי:`,
+    "",
+    "*הנטיות הבולטות שלי:*",
+    ...topTitles.map((t, i) => `${i + 1}. ${t}`),
+    "",
+    main ? `*במילים פשוטות:* ${main.description}` : "",
+    "",
+    "*כיווני מקצוע שהומלצו לי:*",
+    ...careers.slice(0, 6).map((c) => `• ${c}`),
+    "",
+    "האבחון משלב שאלון נטיות מקצועי עם ניתוח בינה מלאכותית של תשובות חופשיות, והמקצועות מותאמים לאורח החיים שלנו.",
+    "",
+    `מומלץ בחום לעשות גם אתם: ${typeof window !== "undefined" ? window.location.origin : ""}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
 
   const submitReview = async () => {
     const name = displayName.trim();
