@@ -150,3 +150,33 @@
     color: #10202b !important;
   }
 }
+
+/* ===== Accessibility widget preferences ===== */
+.a11y-contrast body {
+  background: #000 !important;
+}
+.a11y-contrast .glass,
+.a11y-contrast .glass-strong {
+  background: #000 !important;
+  border-color: #fff !important;
+  backdrop-filter: none !important;
+}
+.a11y-contrast .text-muted-foreground {
+  color: #fff !important;
+}
+.a11y-links a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+.a11y-no-motion *,
+.a11y-no-motion *::before,
+.a11y-no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+.a11y-readable body,
+.a11y-readable * {
+  font-family: Arial, "Heebo", sans-serif !important;
+  letter-spacing: 0.01em;
+}

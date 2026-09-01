@@ -100,16 +100,12 @@ function Quiz() {
   const toggle = (i: number) => {
     if (!question) return;
     const cur = answers[question.id] ?? [];
-    const next = question.multi
-      ? cur.includes(i)
-        ? cur.filter((x) => x !== i)
-        : [...cur, i]
-      : [i];
+    const next = cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i];
     const updated = { ...answers, [question.id]: next };
     setAnswers(updated);
     persist({ answers: updated });
-    if (!question.multi && !isLast && !openAi) setTimeout(() => go(index + 1, updated), 180);
   };
+
 
   const go = (next: number, ans = answers) => {
     if (next >= TOTAL) {
@@ -222,9 +218,10 @@ function Quiz() {
       {question && (
         <section className="glass-strong mt-8 p-6 sm:p-8">
           <h1 className="text-xl font-bold leading-relaxed">{question.text}</h1>
-          {question.multi && (
-            <p className="mt-1 text-sm text-muted-foreground">ניתן לבחור מספר תשובות</p>
-          )}
+          <p className="mt-1 text-sm text-muted-foreground">
+            ניתן לבחור מספר תשובות · לחיצה נוספת מבטלת בחירה
+          </p>
+
           <div className="mt-6 space-y-3">
             {question.choices.map((c, i) => {
               const active = selected.includes(i);
