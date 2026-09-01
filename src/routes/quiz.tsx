@@ -100,16 +100,12 @@ function Quiz() {
   const toggle = (i: number) => {
     if (!question) return;
     const cur = answers[question.id] ?? [];
-    const next = question.multi
-      ? cur.includes(i)
-        ? cur.filter((x) => x !== i)
-        : [...cur, i]
-      : [i];
+    const next = cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i];
     const updated = { ...answers, [question.id]: next };
     setAnswers(updated);
     persist({ answers: updated });
-    if (!question.multi && !isLast && !openAi) setTimeout(() => go(index + 1, updated), 180);
   };
+
 
   const go = (next: number, ans = answers) => {
     if (next >= TOTAL) {
