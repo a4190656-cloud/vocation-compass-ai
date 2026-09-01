@@ -164,7 +164,7 @@ function Home() {
         </p>
         <div className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
           <Timer className="h-3.5 w-3.5" />
-          כ-7 דקות
+          כרבע שעה
         </div>
       </header>
 
