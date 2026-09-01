@@ -19,9 +19,9 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "20 שאלות, ניתוח בינה מלאכותית ודוח אישי עם כיווני קריירה מותאמים לציבור החרדי. בעברית מלאה.",
+          "20 שאלות, ניתוח בינה מלאכותית ודוח אישי עם כיווני קריירה מדויקים. בעברית מלאה.",
       },
-      { property: "og:title", content: "אבחון תעסוקתי חכם למגזר החרדי" },
+      { property: "og:title", content: "אבחון תעסוקתי חכם" },
       {
         property: "og:description",
         content: "מצפן אישי בשילוב AI - גלה את הכיוון התעסוקתי שמתאים לך באמת.",
@@ -160,7 +160,7 @@ function Home() {
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
           20 שאלות קצרות, ניתוח חכם של התשובות שלך, ודוח אישי - מצפן שעוזר לך להבין לאן ללכת,
-          עם רשימת מקצועות מסוננת ומותאמת לאורח החיים שלנו.
+          עם רשימת מקצועות מדויקת שמתאימה לך.
         </p>
         <div className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
           <Timer className="h-3.5 w-3.5" />
