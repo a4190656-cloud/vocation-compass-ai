@@ -218,9 +218,10 @@ function Quiz() {
       {question && (
         <section className="glass-strong mt-8 p-6 sm:p-8">
           <h1 className="text-xl font-bold leading-relaxed">{question.text}</h1>
-          {question.multi && (
-            <p className="mt-1 text-sm text-muted-foreground">ניתן לבחור מספר תשובות</p>
-          )}
+          <p className="mt-1 text-sm text-muted-foreground">
+            ניתן לבחור מספר תשובות · לחיצה נוספת מבטלת בחירה
+          </p>
+
           <div className="mt-6 space-y-3">
             {question.choices.map((c, i) => {
               const active = selected.includes(i);
