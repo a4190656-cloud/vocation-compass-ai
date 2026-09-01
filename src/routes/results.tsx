@@ -30,7 +30,7 @@ export const Route = createFileRoute("/results")({
       { title: "המצפן האישי שלי | מצפן" },
       {
         name: "description",
-        content: "המצפן האישי שלך: גרף נטיות תעסוקתיות ורשימת מקצועות מותאמים לאורח החיים החרדי.",
+        content: "המצפן האישי שלך: גרף נטיות תעסוקתיות ורשימת מקצועות שמתאימים לך.",
       },
       { property: "og:title", content: "דוח אבחון תעסוקתי אישי" },
       {
@@ -92,7 +92,7 @@ function Results() {
     "*כיווני מקצוע שהומלצו לי:*",
     ...careers.slice(0, 6).map((c) => `• ${c}`),
     "",
-    "האבחון משלב שאלון נטיות מקצועי עם ניתוח בינה מלאכותית של תשובות חופשיות, והמקצועות מותאמים לאורח החיים שלנו.",
+    "האבחון משלב שאלון נטיות מקצועי עם ניתוח בינה מלאכותית של תשובות חופשיות, וההמלצות מדויקות ומעשיות.",
     "",
     `מומלץ בחום לעשות גם אתם: ${typeof window !== "undefined" ? window.location.origin : ""}`,
   ]
@@ -185,7 +185,7 @@ function Results() {
       <section className="glass-strong mt-8 p-6">
         <h2 className="text-lg font-bold">מקצועות שמתאימים לך</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          הרשימה מסוננת ומותאמת לאורח החיים שלנו.
+          הרשימה מותאמת אישית לנטיות הבולטות שלך.
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {careers.map((c) => (

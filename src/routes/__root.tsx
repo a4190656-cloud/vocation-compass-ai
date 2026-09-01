@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "אבחון תעסוקתי חכם למגזר החרדי" },
+      { title: "אבחון תעסוקתי חכם | מצפן" },
       {
         name: "description",
-        content: "אבחון נטיות תעסוקתיות בשילוב בינה מלאכותית, מותאם לציבור החרדי.",
+        content: "אבחון נטיות תעסוקתיות בשילוב בינה מלאכותית ודוח אישי מלא.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
