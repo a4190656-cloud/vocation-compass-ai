@@ -15,19 +15,40 @@ import brainAsset from "@/assets/brain-icon.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "אבחון תעסוקתי חכם | מצפן" },
+      { title: "אבחון תעסוקתי חכם בעברית | מצפן" },
       {
         name: "description",
         content:
           "20 שאלות, ניתוח בינה מלאכותית ודוח אישי עם כיווני קריירה מדויקים. בעברית מלאה.",
       },
-      { property: "og:title", content: "אבחון תעסוקתי חכם" },
+      { property: "og:title", content: "אבחון תעסוקתי חכם | מצפן" },
       {
         property: "og:description",
         content: "מצפן אישי בשילוב AI - גלה את הכיוון התעסוקתי שמתאים לך באמת.",
       },
+      { property: "og:url", content: "https://vocation-compass-ai.lovable.app/" },
+      { property: "og:type", content: "website" },
+      { property: "og:locale", content: "he_IL" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "index, follow" },
+    ],
+    links: [{ rel: "canonical", href: "https://vocation-compass-ai.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "מצפן — אבחון תעסוקתי חכם",
+          url: "https://vocation-compass-ai.lovable.app/",
+          inLanguage: "he-IL",
+          description:
+            "אבחון נטיות תעסוקתיות בשילוב בינה מלאכותית ודוח אישי מלא בעברית.",
+        }),
+      },
     ],
   }),
+
   component: Home,
 });
 

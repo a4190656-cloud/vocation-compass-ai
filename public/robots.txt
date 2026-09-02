@@ -12,3 +12,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /admin
+
+Sitemap: https://vocation-compass-ai.lovable.app/sitemap.xml
+
