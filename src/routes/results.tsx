@@ -117,7 +117,7 @@ function Results() {
       return;
     }
     setSent(true);
-    toast.success("תודה רבה על הדירוג!");
+    toast.success("תודה רבה! חוות הדעת תפורסם לאחר אישור.");
   };
 
   return (
@@ -228,7 +228,7 @@ function Results() {
         </h2>
         {sent ? (
           <p className="mt-3 text-sm text-muted-foreground">
-            תודה! חוות הדעת שלך מופיעה עכשיו בדף הבית.
+            תודה! חוות הדעת שלך התקבלה ותפורסם באתר לאחר אישור.
           </p>
         ) : (
           <div className="mt-4 space-y-4">
@@ -243,13 +243,19 @@ function Results() {
                 </button>
               ))}
             </div>
-            <Input
-              value={displayName}
-              maxLength={40}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="שם לתצוגה"
-              className="bg-white/5"
-            />
+            <div className="space-y-1.5">
+              <label htmlFor="display-name" className="text-xs text-muted-foreground">
+                שם מוצג — זה השם שיוצג לצד חוות הדעת שלך באתר
+              </label>
+              <Input
+                id="display-name"
+                value={displayName}
+                maxLength={40}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="שם מוצג"
+                className="bg-white/5"
+              />
+            </div>
             <Textarea
               value={comment}
               maxLength={300}

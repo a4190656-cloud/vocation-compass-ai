@@ -52,6 +52,9 @@ export function SiteFooter() {
         <Link to="/accessibility" className="underline underline-offset-4 hover:text-primary">
           הצהרת נגישות
         </Link>
+        <Link to="/auth" className="underline underline-offset-4 hover:text-primary">
+          ניהול
+        </Link>
       </nav>
       <p className="mt-4 text-[11px] text-muted-foreground">
         © {new Date().getFullYear()} מצפן · כל הזכויות שמורות
