@@ -80,7 +80,10 @@ function Admin() {
 
   const setApproved = async (id: string, approved: boolean) => {
     const { error } = await supabase.from("reviews").update({ approved }).eq("id", id);
-    if (error) return toast.error("העדכון נכשל");
+    if (error) {
+      toast.error("העדכון נכשל");
+      return;
+    }
     toast.success(approved ? "התגובה אושרה ומוצגת באתר" : "התגובה הוסרה מהתצוגה");
     refresh();
   };
@@ -95,7 +98,10 @@ function Admin() {
         comment: patch.comment.trim().slice(0, 300),
       })
       .eq("id", id);
-    if (error) return toast.error("השמירה נכשלה");
+    if (error) {
+      toast.error("השמירה נכשלה");
+      return;
+    }
     setEdit((p) => {
       const n = { ...p };
       delete n[id];
@@ -107,14 +113,20 @@ function Admin() {
 
   const removeReview = async (id: string) => {
     const { error } = await supabase.from("reviews").delete().eq("id", id);
-    if (error) return toast.error("המחיקה נכשלה");
+    if (error) {
+      toast.error("המחיקה נכשלה");
+      return;
+    }
     toast.success("התגובה נמחקה");
     refresh();
   };
 
   const removeResult = async (id: string) => {
     const { error } = await supabase.from("diagnoses").delete().eq("id", id);
-    if (error) return toast.error("המחיקה נכשלה");
+    if (error) {
+      toast.error("המחיקה נכשלה");
+      return;
+    }
     toast.success("התוצאה נמחקה");
     qc.invalidateQueries({ queryKey: ["admin-results"] });
   };
