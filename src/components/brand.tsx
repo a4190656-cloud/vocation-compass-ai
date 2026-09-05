@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import brainAsset from "@/assets/brain-icon.png.asset.json";
-import aoAsset from "@/assets/ao-logo.png.asset.json";
+const brainAsset = { url: "/brain-icon.webp" };
+const aoAsset = { url: "/ao-logo.png" };
 
 export function BrandHeader() {
   return (

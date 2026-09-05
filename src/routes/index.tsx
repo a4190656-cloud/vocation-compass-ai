@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { BrandHeader, SiteFooter } from "@/components/brand";
 import { STORAGE_KEY } from "@/lib/riasec";
 import { toast } from "sonner";
-import brainAsset from "@/assets/brain-icon.png.asset.json";
+const brainAsset = { url: "/brain-icon.webp" };
 
 export const Route = createFileRoute("/")({
   head: () => ({
