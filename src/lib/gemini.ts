@@ -20,7 +20,7 @@ export async function analyzeFreeText(input: {
   question: string;
   text: string;
 }): Promise<AiTagResult> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+  const apiKey = import.meta.env["VITE_GEMINI_API_KEY"] as string | undefined;
   if (!apiKey) throw new Error("Missing VITE_GEMINI_API_KEY");
 
   const res = await fetch(
