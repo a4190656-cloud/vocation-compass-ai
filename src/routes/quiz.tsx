@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, SkipForward } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandHeader, SiteFooter } from "@/components/brand";
-import { analyzeFreeText } from "@/lib/ai.functions";
+import { analyzeFreeText } from "@/lib/gemini";
+
 import {
   QUESTIONS,
   RESULT_KEY,
