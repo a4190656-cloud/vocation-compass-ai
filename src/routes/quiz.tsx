@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, SkipForward } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { BrandHeader, SiteFooter } from "@/components/brand";
-import { analyzeFreeText } from "@/lib/ai.functions";
+import { analyzeFreeText } from "@/lib/gemini";
+
 import {
   QUESTIONS,
   RESULT_KEY,
@@ -58,7 +58,6 @@ function load(): Saved {
 
 function Quiz() {
   const navigate = useNavigate();
-  const analyze = useServerFn(analyzeFreeText);
   const [ready, setReady] = useState(false);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
@@ -173,8 +172,9 @@ function Quiz() {
     }
     setBusy(true);
     try {
-      const res = await analyze({
-        data: { question: question.text, text: text.slice(0, 500) },
+      const res = await analyzeFreeText({
+        question: question.text,
+        text: text.slice(0, 500),
       });
       const updated = { ...aiScores, [question.id]: res.scores };
       setAiScores(updated);
