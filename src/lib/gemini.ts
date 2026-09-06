@@ -21,55 +21,54 @@ export async function analyzeFreeText(input: {
   text: string;
 }): Promise<AiTagResult> {
   const apiKey = import.meta.env["VITE_GEMINI_API_KEY"] as string | undefined;
-  if (!apiKey) throw new Error("Missing VITE_GEMINI_API_KEY");
+  if (!apiKey) {
+    console.error("[Gemini] Missing VITE_GEMINI_API_KEY env var");
+    throw new Error("Missing VITE_GEMINI_API_KEY");
+  }
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`,
-    {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const prompt = `${SYSTEM}\n\nשאלה: ${input.question}\nתשובה חופשית: ${input.text.slice(0, 500)}`;
+
+  const body = {
+    contents: [
+      {
+        parts: [{ text: prompt }],
+      },
+    ],
+    generationConfig: {
+      temperature: 0.2,
+      responseMimeType: "application/json",
+    },
+  };
+
+  let res: Response;
+  try {
+    res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM }] },
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: `שאלה: ${input.question}\nתשובה חופשית: ${input.text.slice(0, 500)}`,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "OBJECT",
-            properties: {
-              R: { type: "INTEGER" },
-              I: { type: "INTEGER" },
-              A: { type: "INTEGER" },
-              S: { type: "INTEGER" },
-              E: { type: "INTEGER" },
-              C: { type: "INTEGER" },
-              summary: { type: "STRING" },
-            },
-            required: ["R", "I", "A", "S", "E", "C", "summary"],
-          },
-        },
-      }),
-    },
-  );
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    console.error("[Gemini] fetch threw:", err);
+    throw new Error(`Gemini fetch failed: ${(err as Error).message}`);
+  }
 
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Gemini API failed [${res.status}]: ${body.slice(0, 300)}`);
+    const errBody = await res.text().catch(() => "");
+    console.error("[Gemini] API error:", {
+      status: res.status,
+      statusText: res.statusText,
+      body: errBody,
+    });
+    throw new Error(`Gemini API failed [${res.status}]: ${errBody}`);
   }
 
   const json = (await res.json()) as {
     candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    promptFeedback?: unknown;
   };
-  const out = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
+  const out =
+    json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
 
   try {
     const parsed = JSON.parse(out) as Record<string, unknown>;
@@ -84,7 +83,8 @@ export async function analyzeFreeText(input: {
       },
       summary: typeof parsed["summary"] === "string" ? parsed["summary"] : "",
     };
-  } catch {
+  } catch (err) {
+    console.error("[Gemini] JSON parse failed:", err, "raw:", out);
     return { scores: { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 }, summary: "" };
   }
 }
