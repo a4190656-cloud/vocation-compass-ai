@@ -1,6 +1,27 @@
 // =====================================================================================
 // מערכת אבחון תעסוקתי — RIASEC + Work Style + Work Values + Career Matching
-// 100% דטרמיניסטי, ללא AI, כל החישוב מתבצע מקומית בדפדפן.
+// גרסה 3 — לאחר סבב ביקורת שני, ממוקד בשלושה דברים שניתן לשפר בפועל בקוד (בלי
+// נתוני אוכלוסייה אמיתיים, שהם מחוץ להיקף אפשרי כאן):
+//
+// 1) מהימנות מדידה: הוכפל מספר הפריטים (RIASEC: 4→5 לממד, Work Style: 1→2 לציר) כדי
+//    שיהיה בכלל אפשר לחשב עקביות פנימית אמיתית ולא רק לטעון שהיא קיימת.
+// 2) מדד עקביות תשובות אמיתי per-response (לא מדד אוכלוסייה כמו Cronbach's alpha,
+//    וזה מצוין בפירוש) - מבוסס Split-Half על הפריטים בפועל שהמשתמש ענה עליהם.
+// 3) סיפי הרמות (נמוך/בינוני/גבוה/גבוה מאוד) כבר לא קבועים שרירותיים (25/50/75%).
+//    הם נגזרים מסימולציית Monte-Carlo דטרמיניסטית (PRNG עם seed קבוע) של "עונה
+//    אקראי" על אותו שאלון בדיוק - כך שהרף מבוסס בפועל על "כמה זה שונה ממענה
+//    מקרי", ולא על מספרים עגולים.
+// 4) משקלי נוסחת ההתאמה (RIASEC/Work Style/Work Values) נגזרים ממספר הפריטים
+//    בכל מרכיב (קירוב ל"אורך מבחן = אמינות" לפי כלל Spearman-Brown) ומהעדיפות
+//    התיאורטית של הולנד לתחומי עניין כמנבא ראשי - לא נבחרו כי "הם הרגישו נכון".
+//
+// מגבלה גלויה שנשארה: פרופילי המקצועות (RIASEC 6-ממדי לכל מקצוע) נבנו בהערכה
+// מקצועית עקבית, לא מנתוני O*NET גולמיים. בדקתי מדגם מול O*NET (onetonline.org)
+// ומצאתי התאמה כיוונית טובה (לדוגמה: חשמלאים = Realistic/Conventional דומיננטי,
+// מפתחי תוכנה = Investigative דומיננטי - תואם בדיוק את מה שהוגדר כאן), אך
+// O*NET Online החדש חושף רק את תחומי העניין המובילים כטקסט, לא ציון מספרי
+// לכל שש הממדים לכל מקצוע - כך שאי אפשר "לשאוב" נתונים מספריים מלאים בלי
+// קובצי מסד הנתונים הגולמיים של O*NET, שהם מחוץ להיקף אפשרי כאן.
 // =====================================================================================
 
 // --------------------------------- RIASEC ---------------------------------
@@ -18,7 +39,6 @@ export interface TypeInfo {
   short: string;
   description: string;
   strengths: string[];
-  /** מה עלול להתאים פחות למי שחזק בממד הזה, או להסביר החלשה בממד */
   lowDescription: string;
 }
 
@@ -37,8 +57,7 @@ export const TYPES: Record<RiasecKey, TypeInfo> = {
     key: "I",
     title: "החוקר (Investigative)",
     short: "לרדת לעומק, להבין למה",
-    description:
-      "המוח שלך לא נח עד שהבנת את השורש. אתה אוהב לנתח, לחקור, להשוות ולבנות מסקנה מסודרת - בדיוק כמו סוגיה עמוקה שצריך לפרק לגורמים.",
+    description: "המוח שלך לא נח עד שהבנת את השורש. אתה אוהב לנתח, לחקור, להשוות ולבנות מסקנה מסודרת.",
     strengths: ["חשיבה אנליטית", "למידה עצמאית מהירה", "דיוק בפרטים", "יכולת סברא והבחנה"],
     lowDescription:
       "עבודה עם שגרה חוזרת בלי מרחב לחשוב ולנתח לעומק, או כזו שדורשת החלטות מהירות בלי זמן לבדוק, עלולה להתאים פחות.",
@@ -47,8 +66,7 @@ export const TYPES: Record<RiasecKey, TypeInfo> = {
     key: "A",
     title: "היוצר (Artistic)",
     short: "לראות את מה שעוד לא קיים",
-    description:
-      "יש לך עין לפרטים אסתטיים ולראש שממציא. אתה נהנה לייצר משהו משלך - עיצוב, כתיבה, ניגון או רעיון חדש שאף אחד עוד לא חשב עליו.",
+    description: "יש לך עין לפרטים אסתטיים ולראש שממציא. אתה נהנה לייצר משהו משלך - עיצוב, כתיבה, ניגון או רעיון חדש.",
     strengths: ["דמיון ורעננות", "חוש עיצובי", "יכולת ביטוי", "חשיבה מחוץ לקופסה"],
     lowDescription:
       "סביבות עם נהלים נוקשים וחוזרים על עצמם, בלי שום מקום לביטוי אישי או לגיוון, עלולות להרגיש מחניקות עבורך.",
@@ -57,8 +75,7 @@ export const TYPES: Record<RiasecKey, TypeInfo> = {
     key: "S",
     title: "החברתי (Social)",
     short: "אנשים לפני הכל",
-    description:
-      "אתה מתמלא מאנשים. יש לך אוזן קשבת, סבלנות ויכולת להסביר, לחבר ולהרים אחרים - ואתה מרגיש שליחות אמיתית בעזרה לזולת.",
+    description: "אתה מתמלא מאנשים. יש לך אוזן קשבת, סבלנות ויכולת להסביר, לחבר ולהרים אחרים.",
     strengths: ["אמפתיה והקשבה", "יכולת הוראה והסבר", "בניית אמון", "פישור וגישור"],
     lowDescription:
       "עבודה בבידוד ממושך מול מסך או מכונה, כמעט בלי קשר עם בני אדם, עלולה להרגיש ריקה מבחינתך לאורך זמן.",
@@ -67,8 +84,7 @@ export const TYPES: Record<RiasecKey, TypeInfo> = {
     key: "E",
     title: "היזם (Enterprising)",
     short: "להוביל, לשכנע, להזיז",
-    description:
-      "אתה לא מחכה שיקרה - אתה גורם לזה לקרות. יש לך כוח שכנוע, ראש של הזדמנויות ונוחות עם אחריות וניהול אנשים.",
+    description: "אתה לא מחכה שיקרה - אתה גורם לזה לקרות. יש לך כוח שכנוע, ראש של הזדמנויות ונוחות עם אחריות וניהול אנשים.",
     strengths: ["יכולת מכירה ושכנוע", "ראייה עסקית", "הובלת צוות", "אורך רוח ליזמות"],
     lowDescription:
       "תפקידים שגרתיים ומוגדרים מראש, בלי שום אפשרות ליזום, להוביל או להשפיע על כיוון, עלולים להרגיש תקועים מדי.",
@@ -86,7 +102,6 @@ export const TYPES: Record<RiasecKey, TypeInfo> = {
 };
 
 // --------------------------------- Work Style ---------------------------------
-// כל ממד הוא ציר דו-קוטבי בטווח 100- עד 100. לא משויך אוטומטית ל-RIASEC.
 
 export type WorkStyleKey =
   | "aloneVsPeople"
@@ -117,8 +132,8 @@ export const emptyWorkStyle = (): WorkStyleScores =>
 export interface WorkStyleAxisInfo {
   key: WorkStyleKey;
   title: string;
-  negLabel: string; // הקוטב בצד 100-
-  posLabel: string; // הקוטב בצד 100
+  negLabel: string;
+  posLabel: string;
 }
 
 export const WORK_STYLE_AXES: Record<WorkStyleKey, WorkStyleAxisInfo> = {
@@ -194,7 +209,7 @@ export const WORK_VALUE_LABELS: Record<WorkValueKey, string> = {
 
 // --------------------------------- Questions ---------------------------------
 
-export type QuestionCategory = "riasec" | "workStyle" | "workValues" | "validation";
+export type QuestionCategory = "riasec" | "workStyle" | "workValues" | "meta";
 export type QuestionMode = "single" | "multi";
 
 export interface Choice {
@@ -202,8 +217,7 @@ export interface Choice {
   riasec?: Partial<Scores>;
   workStyle?: Partial<WorkStyleScores>;
   workValues?: Partial<WorkValueScores>;
-  /** לשאלת הכיול בלבד: איזו אות "מוצהרת" הבחירה הזו מייצגת */
-  validationLetter?: RiasecKey;
+  meta?: "easy" | "mixed" | "hard";
 }
 
 export interface Question {
@@ -213,466 +227,193 @@ export interface Question {
   hint?: string;
   mode: QuestionMode;
   choices: Choice[];
+  maxSelect?: number;
 }
 
-const r = (weights: Partial<Scores>): Pick<Choice, "riasec"> => ({ riasec: weights });
+const LIKERT_LABELS = ["לא מתאר אותי בכלל", "מתאר אותי במידה מועטה", "מתאר אותי במידה רבה", "מתאר אותי מאוד"];
+
+function riasecLikert(id: string, key: RiasecKey, text: string, reverse = false): Question {
+  return {
+    id,
+    category: "riasec",
+    mode: "single",
+    text,
+    choices: LIKERT_LABELS.map((label, i) => {
+      const rating = i + 1;
+      const score = reverse ? 5 - rating : rating;
+      return { label, riasec: { [key]: score } as Partial<Scores> };
+    }),
+  };
+}
+
+const WORK_STYLE_LIKERT_VALUES = [-100, -33, 33, 100];
+
+function workStyleLikert(id: string, key: WorkStyleKey, text: string): Question {
+  return {
+    id,
+    category: "workStyle",
+    mode: "single",
+    text,
+    choices: LIKERT_LABELS.map((label, i) => ({
+      label,
+      workStyle: { [key]: WORK_STYLE_LIKERT_VALUES[i] } as Partial<WorkStyleScores>,
+    })),
+  };
+}
+
+/**
+ * מפת הפריטים לכל ממד RIASEC, לצורך חישוב עקביות פנימית (לא לצורך הניקוד הראשי):
+ * forwardIds מחולקים כבר לשני חצאים (halfA / halfB) עבור בדיקת Split-Half אמיתית,
+ * ו-reverseId הוא הפריט המנוסח הפוך.
+ */
+export const RELIABILITY_ITEM_MAP: Record<
+  RiasecKey,
+  { halfA: string[]; halfB: string[]; reverseId: string }
+> = {
+  R: { halfA: ["r_r1", "r_r2"], halfB: ["r_r3", "r_r5"], reverseId: "r_r4" },
+  I: { halfA: ["r_i1", "r_i2"], halfB: ["r_i3", "r_i5"], reverseId: "r_i4" },
+  A: { halfA: ["r_a1", "r_a2"], halfB: ["r_a3", "r_a5"], reverseId: "r_a4" },
+  S: { halfA: ["r_s1", "r_s2"], halfB: ["r_s3", "r_s5"], reverseId: "r_s4" },
+  E: { halfA: ["r_e1", "r_e2"], halfB: ["r_e3", "r_e5"], reverseId: "r_e4" },
+  C: { halfA: ["r_c1", "r_c2"], halfB: ["r_c3", "r_c5"], reverseId: "r_c4" },
+};
+
+export const WORK_STYLE_ITEM_PAIRS: Record<WorkStyleKey, [string, string]> = {
+  aloneVsPeople: ["ws_aloneVsPeople_1", "ws_aloneVsPeople_2"],
+  officeVsField: ["ws_officeVsField_1", "ws_officeVsField_2"],
+  handsVsThinking: ["ws_handsVsThinking_1", "ws_handsVsThinking_2"],
+  routineVsVariety: ["ws_routineVsVariety_1", "ws_routineVsVariety_2"],
+  structureVsAmbiguity: ["ws_structureVsAmbiguity_1", "ws_structureVsAmbiguity_2"],
+  fastVsCalmPace: ["ws_fastVsCalmPace_1", "ws_fastVsCalmPace_2"],
+  independenceVsFramework: ["ws_independenceVsFramework_1", "ws_independenceVsFramework_2"],
+  publicVsBackstage: ["ws_publicVsBackstage_1", "ws_publicVsBackstage_2"],
+};
 
 export const QUESTIONS: Question[] = [
-  // ============================= RIASEC (24) =============================
-  {
-    id: "q1",
-    category: "riasec",
-    mode: "single",
-    text: "כשיש לך שעה פנויה באמצע היום, במה תבחר לעסוק?",
-    choices: [
-      { label: "לתקן משהו בבית שמזמן מחכה", ...r({ R: 3 }) },
-      { label: "לקרוא מאמר או ללמוד נושא חדש לעומק", ...r({ I: 3 }) },
-      { label: "לשרבט רעיון לעיצוב או לכתוב משהו", ...r({ A: 3 }) },
-      { label: "לדבר עם חבר שצריך חיזוק", ...r({ S: 3 }) },
-      { label: "לקדם רעיון עסקי שרץ לי בראש", ...r({ E: 3 }) },
-      { label: "לסדר את הניירת והחשבונות", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q2",
-    category: "riasec",
-    mode: "single",
-    text: "מה מתאר הכי טוב את הדרך שבה אתה לומד סוגיה חדשה?",
-    choices: [
-      { label: "מנסה בפועל עד שזה עובד", ...r({ R: 3, I: 1 }) },
-      { label: "מפרק לגורמים ובונה מסקנה", ...r({ I: 3 }) },
-      { label: "מדמיין תמונה שלמה בראש", ...r({ A: 3 }) },
-      { label: "לומד בחברותא ובדיבור", ...r({ S: 3 }) },
-      { label: "מחפש מיד איך זה יכול להועיל בפועל", ...r({ E: 3 }) },
-      { label: "עושה סיכום מסודר בכתב", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q3",
-    category: "riasec",
-    mode: "multi",
-    text: "אילו משימות בעבודה גורמות לך להרגיש 'בזרימה'? (אפשר לבחור כמה)",
-    choices: [
-      { label: "עבודה עם כלים ומכשור", ...r({ R: 2 }) },
-      { label: "ניתוח נתונים ומספרים", ...r({ I: 2, C: 1 }) },
-      { label: "יצירת חומרים מעוצבים", ...r({ A: 2 }) },
-      { label: "ליווי והדרכה של אנשים", ...r({ S: 2 }) },
-      { label: "משא ומתן וסגירת עסקאות", ...r({ E: 2 }) },
-      { label: "סידור מערכות ונהלים", ...r({ C: 2 }) },
-    ],
-  },
-  {
-    id: "q4",
-    category: "riasec",
-    mode: "single",
-    text: "בתוך צוות, איזה תפקיד טבעי לך?",
-    choices: [
-      { label: "זה שמבצע בשטח", ...r({ R: 3 }) },
-      { label: "זה שבודק את הנתונים", ...r({ I: 3 }) },
-      { label: "זה שמביא רעיונות חדשים", ...r({ A: 3 }) },
-      { label: "זה שמחזיק את האווירה והאנשים", ...r({ S: 3 }) },
-      { label: "זה שמוביל ומחלק משימות", ...r({ E: 3 }) },
-      { label: "זה שמנהל את הלו\"ז והמעקב", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q5",
-    category: "riasec",
-    mode: "single",
-    text: "איזו מחמאה הכי מדויקת לגביך?",
-    choices: [
-      { label: "\"יש לך ידי זהב\"", ...r({ R: 3 }) },
-      { label: "\"יש לך ראש חד\"", ...r({ I: 3 }) },
-      { label: "\"יש לך עין וטעם טוב\"", ...r({ A: 3 }) },
-      { label: "\"אתה יודע לדבר ללב\"", ...r({ S: 3 }) },
-      { label: "\"אתה יודע להזיז דברים\"", ...r({ E: 3 }) },
-      { label: "\"אצלך אף פעם אין בלגן\"", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q6",
-    category: "riasec",
-    mode: "single",
-    text: "מה יגרום לך להרגיש שיום העבודה היה מוצלח?",
-    choices: [
-      { label: "סיימתי משהו מוחשי שרואים", ...r({ R: 3 }) },
-      { label: "הבנתי בעיה שאף אחד לא פתר", ...r({ I: 3 }) },
-      { label: "יצרתי משהו יפה", ...r({ A: 3 }) },
-      { label: "עזרתי למישהו באמת", ...r({ S: 3 }) },
-      { label: "סגרתי עסקה או קידמתי יעד", ...r({ E: 3 }) },
-      { label: "הכל מסודר ומעודכן", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q7",
-    category: "riasec",
-    mode: "single",
-    text: "כשמתגלה תקלה גדולה, מה התגובה הראשונה שלך?",
-    choices: [
-      { label: "ניגש לתקן בידיים", ...r({ R: 3 }) },
-      { label: "מחפש את שורש הבעיה", ...r({ I: 3 }) },
-      { label: "חושב על פתרון עוקף יצירתי", ...r({ A: 3 }) },
-      { label: "מרגיע את האנשים שנפגעו", ...r({ S: 3 }) },
-      { label: "לוקח פיקוד ומחלק משימות", ...r({ E: 3 }) },
-      { label: "בודק מה בנוהל ומתעד", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q8",
-    category: "riasec",
-    mode: "multi",
-    text: "אילו לימודי מקצוע היו מושכים אותך? (אפשר לבחור כמה)",
-    choices: [
-      { label: "חשמל / מיזוג / טכנאות", ...r({ R: 2 }) },
-      { label: "תכנות ומדעי המחשב", ...r({ I: 2 }) },
-      { label: "עיצוב גרפי ווידאו", ...r({ A: 2 }) },
-      { label: "טיפול, חינוך והוראה", ...r({ S: 2 }) },
-      { label: "ניהול, שיווק ומכירות", ...r({ E: 2 }) },
-      { label: "הנהלת חשבונות ושכר", ...r({ C: 2 }) },
-    ],
-  },
-  {
-    id: "q9",
-    category: "riasec",
-    mode: "single",
-    text: "איך אתה מרגיש מול קהל?",
-    choices: [
-      { label: "מעדיף שהעבודה שלי תדבר בעצמה, לא אני", ...r({ R: 2 }) },
-      { label: "מוכן להרצות אם אני שולט בחומר", ...r({ I: 2 }) },
-      { label: "אוהב להציג דברים שיצרתי", ...r({ A: 2 }) },
-      { label: "נהנה מאוד מקשר עם קהל", ...r({ S: 3 }) },
-      { label: "מרגיש בבית על הבמה", ...r({ E: 3 }) },
-      { label: "מעדיף לתקשר בכתב מסודר", ...r({ C: 2 }) },
-    ],
-  },
-  {
-    id: "q10",
-    category: "riasec",
-    mode: "single",
-    text: "מה מתסכל אותך הכי הרבה בעבודה?",
-    choices: [
-      { label: "לשבת בלי לעשות כלום מעשי", ...r({ R: 3 }) },
-      { label: "החלטות בלי בדיקה רצינית", ...r({ I: 3 }) },
-      { label: "שגרה שחוזרת על עצמה בלי גיוון", ...r({ A: 3 }) },
-      { label: "יחס לא הוגן לאנשים", ...r({ S: 3 }) },
-      { label: "התקדמות איטית וביורוקרטיה", ...r({ E: 3 }) },
-      { label: "בלגן וחוסר סדר", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q11",
-    category: "riasec",
-    mode: "single",
-    text: "בגמ\"ח או בפעילות קהילתית, מה תיקח על עצמך?",
-    choices: [
-      { label: "הקמה, הובלה והתקנות", ...r({ R: 3 }) },
-      { label: "בניית מערכת מידע ומעקב", ...r({ I: 2, C: 2 }) },
-      { label: "עיצוב הפרסום והחומרים", ...r({ A: 3 }) },
-      { label: "קשר אישי עם הנזקקים", ...r({ S: 3 }) },
-      { label: "גיוס תורמים", ...r({ E: 3 }) },
-      { label: "ניהול הקופה והרישום", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q12",
-    category: "riasec",
-    mode: "multi",
-    text: "אילו כלים אתה נהנה לעבוד איתם? (אפשר לבחור כמה)",
-    choices: [
-      { label: "כלי עבודה ומכשור", ...r({ R: 2 }) },
-      { label: "גיליונות נתונים ומחקר", ...r({ I: 2 }) },
-      { label: "תוכנות עיצוב ועריכה", ...r({ A: 2 }) },
-      { label: "שיחה, טלפון ופגישות", ...r({ S: 2 }) },
-      { label: "מצגות והצעות מחיר", ...r({ E: 2 }) },
-      { label: "מערכות ניהול ורישום", ...r({ C: 2 }) },
-    ],
-  },
-  {
-    id: "q13",
-    category: "riasec",
-    mode: "single",
-    text: "איזה סוג הצלחה היית רוצה לספר עליו בעוד עשר שנים?",
-    choices: [
-      { label: "בניתי דברים שעומדים ומשרתים אנשים", ...r({ R: 3 }) },
-      { label: "פתרתי בעיה מקצועית מורכבת", ...r({ I: 3 }) },
-      { label: "יצרתי משהו שהשאיר חותם", ...r({ A: 3 }) },
-      { label: "שיניתי חיים של אנשים", ...r({ S: 3 }) },
-      { label: "הקמתי עסק מצליח", ...r({ E: 3 }) },
-      { label: "בניתי מערכת שעובדת בלי טעויות", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q14",
-    category: "riasec",
-    mode: "single",
-    text: "מה קורה לך מול טבלת אקסל גדולה?",
-    choices: [
-      { label: "מעדיף לצאת לשטח", ...r({ R: 3 }) },
-      { label: "מיד מחפש מגמות ותובנות", ...r({ I: 3 }) },
-      { label: "רוצה להפוך אותה לגרף יפה", ...r({ A: 2, C: 1 }) },
-      { label: "שואל איך זה משפיע על אנשים", ...r({ S: 3 }) },
-      { label: "בודק איפה אפשר להרוויח יותר", ...r({ E: 3 }) },
-      { label: "נהנה לסדר ולנקות אותה", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q15",
-    category: "riasec",
-    mode: "multi",
-    text: "איזה סוג אחריות מרגיש לך נוח? (אפשר לבחור כמה)",
-    choices: [
-      { label: "אחריות על ציוד ותשתיות", ...r({ R: 2 }) },
-      { label: "אחריות על נכונות ומידע", ...r({ I: 2 }) },
-      { label: "אחריות על מראה ומיתוג", ...r({ A: 2 }) },
-      { label: "אחריות על אנשים", ...r({ S: 2 }) },
-      { label: "אחריות על תוצאות ורווח", ...r({ E: 2 }) },
-      { label: "אחריות על סדר וכספים", ...r({ C: 2 }) },
-    ],
-  },
-  {
-    id: "q16",
-    category: "riasec",
-    mode: "single",
-    text: "ואם היית יכול לבחור מקצוע בלי שום מגבלה, מה היה קרוב לזה?",
-    choices: [
-      { label: "בעל מקצוע מבוקש בשטח", ...r({ R: 3 }) },
-      { label: "מומחה טכנולוגי או מחקרי", ...r({ I: 3 }) },
-      { label: "יוצר, מעצב או כותב", ...r({ A: 3 }) },
-      { label: "מחנך, מטפל או מדריך", ...r({ S: 3 }) },
-      { label: "בעל עסק או מנהל בכיר", ...r({ E: 3 }) },
-      { label: "מנהל כספים ומערכות", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q17",
-    category: "riasec",
-    mode: "single",
-    text: "בסוף הכשרה או קורס, מה הכי ירגש אותך?",
-    choices: [
-      { label: "פרויקט מעשי שסיימתי בהצלחה", ...r({ R: 3 }) },
-      { label: "הבנה מלאה של החומר התיאורטי", ...r({ I: 3 }) },
-      { label: "יצרתי משהו מקורי משלי", ...r({ A: 3 }) },
-      { label: "עזרתי לחברים בקבוצה להבין", ...r({ S: 3 }) },
-      { label: "הובלתי את הקבוצה להישג", ...r({ E: 3 }) },
-      { label: "סיכום מסודר שכולם השתמשו בו", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q18",
-    category: "riasec",
-    mode: "single",
-    text: "מה תעדיף לעשות בסוף שבוע כדי 'להתאוורר' מהראש?",
-    choices: [
-      { label: "לתקן/לבנות משהו בבית", ...r({ R: 3 }) },
-      { label: "לקרוא או לצפות בתוכן מעמיק", ...r({ I: 3 }) },
-      { label: "ליצור, לצייר, לנגן, לכתוב", ...r({ A: 3 }) },
-      { label: "לבלות עם אנשים קרובים", ...r({ S: 3 }) },
-      { label: "לתכנן פרויקט או יוזמה חדשה", ...r({ E: 3 }) },
-      { label: "לסדר ולארגן את הבית / החדר", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q19",
-    category: "riasec",
-    mode: "multi",
-    text: "אילו מהמשפטים הבאים נכונים עליך? (אפשר לבחור כמה)",
-    choices: [
-      { label: "אני טוב עם הידיים וכלים", ...r({ R: 2 }) },
-      { label: "אני שואל \"למה\" על כל דבר", ...r({ I: 2 }) },
-      { label: "יש לי דמיון עשיר", ...r({ A: 2 }) },
-      { label: "אנשים באים אליי לדבר", ...r({ S: 2 }) },
-      { label: "אני יוזם דברים בלי לחכות שיבקשו", ...r({ E: 2 }) },
-      { label: "אני שם לב לפרטים קטנים שאחרים מפספסים", ...r({ C: 2 }) },
-    ],
-  },
-  {
-    id: "q20",
-    category: "riasec",
-    mode: "single",
-    text: "כשמשהו נשבר או לא עובד בבית, מה קורה קודם?",
-    choices: [
-      { label: "אני פותח ומנסה לתקן בעצמי", ...r({ R: 3 }) },
-      { label: "אני מחפש הסבר טכני לתקלה", ...r({ I: 3 }) },
-      { label: "אני חושב על פתרון יצירתי זמני", ...r({ A: 3 }) },
-      { label: "אני מבקש עזרה ממישהו קרוב", ...r({ S: 3 }) },
-      { label: "אני מתקשר למישהו שיבוא לתקן", ...r({ E: 2 }) },
-      { label: "אני בודק במדריך / באחריות מה הנוהל", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q21",
-    category: "riasec",
-    mode: "single",
-    text: "איזה סוג פרויקט היה נותן לך הכי הרבה סיפוק להוביל?",
-    choices: [
-      { label: "בניית משהו פיזי מהיסוד", ...r({ R: 3 }) },
-      { label: "מחקר שמגלה משהו חדש", ...r({ I: 3 }) },
-      { label: "יצירת קמפיין או עיצוב מקורי", ...r({ A: 3 }) },
-      { label: "תוכנית שעוזרת לאנשים", ...r({ S: 3 }) },
-      { label: "עסק או מיזם חדש שמניב רווח", ...r({ E: 3 }) },
-      { label: "מערכת שמסדרת תהליך מבולגן", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q22",
-    category: "riasec",
-    mode: "multi",
-    text: "אילו מהפעילויות הבאות היית עושה גם בהתנדבות, בלי תשלום? (אפשר לבחור כמה)",
-    choices: [
-      { label: "לעזור בבנייה / שיפוץ לנזקקים", ...r({ R: 2 }) },
-      { label: "לחקור ולכתוב על נושא שמעניין אותי", ...r({ I: 2 }) },
-      { label: "לעצב / לצייר / ליצור למען מטרה", ...r({ A: 2 }) },
-      { label: "ללוות ולהקשיב למישהו במצוקה", ...r({ S: 2 }) },
-      { label: "לגייס תרומות ולשווק מטרה", ...r({ E: 2 }) },
-      { label: "לנהל את הרישום והתקציב של עמותה", ...r({ C: 2 }) },
-    ],
-  },
-  {
-    id: "q23",
-    category: "riasec",
-    mode: "single",
-    text: "מה יגרום לך להרגיש שבזבזת יום שלם?",
-    choices: [
-      { label: "לא עשיתי שום דבר מוחשי", ...r({ R: 3 }) },
-      { label: "לא למדתי או הבנתי שום דבר חדש", ...r({ I: 3 }) },
-      { label: "לא יצרתי כלום", ...r({ A: 3 }) },
-      { label: "לא היה לי קשר משמעותי עם אף אחד", ...r({ S: 3 }) },
-      { label: "לא קידמתי שום דבר קדימה", ...r({ E: 3 }) },
-      { label: "הכל היה מבולגן ולא מסודר", ...r({ C: 3 }) },
-    ],
-  },
-  {
-    id: "q24",
-    category: "riasec",
-    mode: "single",
-    text: "בסיפור על עצמך בעוד חמש שנים, מה הכי מדויק?",
-    choices: [
-      { label: "בעל מקצוע מבוקש שעובד עם הידיים", ...r({ R: 3 }) },
-      { label: "מומחה שמבין לעומק תחום מסוים", ...r({ I: 3 }) },
-      { label: "יוצר עם סגנון וקול משלו", ...r({ A: 3 }) },
-      { label: "מישהו שאנשים סומכים עליו ופונים אליו", ...r({ S: 3 }) },
-      { label: "מוביל צוות או בעל עסק משגשג", ...r({ E: 3 }) },
-      { label: "מישהו שהכל אצלו מתפקד בלי תקלות", ...r({ C: 3 }) },
-    ],
-  },
+  // ============================= RIASEC — 30 היגדי Likert (5 לכל ממד: 4 קדימה + 1 הפוך) =============================
+  riasecLikert("r_r1", "R", "אני נהנה לתקן ולבנות דברים בידיים"),
+  riasecLikert("r_r2", "R", "אני מעדיף לפתור בעיה בצורה מעשית על פני דיון תיאורטי עליה"),
+  riasecLikert("r_r3", "R", "אני נמשך לעבודה עם כלים, מכונות או חומרים מוחשיים"),
+  riasecLikert("r_r5", "R", "אני שמח לבלות זמן בעבודה גופנית או בשטח הפתוח"),
+  riasecLikert("r_r4", "R", "עבודה עם הידיים לא ממש מושכת אותי", true),
 
-  // ============================= Work Style (4) =============================
-  {
-    id: "ws1",
-    category: "workStyle",
-    mode: "multi",
-    text: "תאר לעצמך יום עבודה אידיאלי — אילו מהתיאורים הבאים הכי מדברים אליך? (אפשר לבחור כמה)",
-    choices: [
-      { label: "עבודה שקטה לבד, בלי הרבה אינטראקציה", workStyle: { aloneVsPeople: -2 } },
-      { label: "עבודה בצוות עם אנשים כל היום", workStyle: { aloneVsPeople: 2 } },
-      { label: "רוב הזמן במשרד מסודר וקבוע", workStyle: { officeVsField: -2 } },
-      { label: "רוב הזמן בשטח, בתנועה, בין מקומות", workStyle: { officeVsField: 2 } },
-    ],
-  },
-  {
-    id: "ws2",
-    category: "workStyle",
-    mode: "multi",
-    text: "מה מתאר טוב יותר את סוג הפעילות שגורמת לך סיפוק? (אפשר לבחור כמה)",
-    choices: [
-      { label: "לעבוד עם הידיים ולראות תוצאה מוחשית", workStyle: { handsVsThinking: -2 } },
-      { label: "לחשוב, לנתח ולתכנן", workStyle: { handsVsThinking: 2 } },
-      { label: "שגרה קבועה שאני שולט בה היטב", workStyle: { routineVsVariety: -2 } },
-      { label: "כל יום שונה ומגוון מהקודם", workStyle: { routineVsVariety: 2 } },
-    ],
-  },
-  {
-    id: "ws3",
-    category: "workStyle",
-    mode: "multi",
-    text: "באיזה סוג סביבה אתה מתפקד הכי טוב? (אפשר לבחור כמה)",
-    choices: [
-      { label: "כשיש לי הנחיות ברורות ומדויקות מראש", workStyle: { structureVsAmbiguity: -2 } },
-      { label: "כשיש הרבה מקום לפרש ולהחליט בעצמי", workStyle: { structureVsAmbiguity: 2 } },
-      { label: "קצב מהיר, לחץ ואתגרים מיידיים", workStyle: { fastVsCalmPace: 2 } },
-      { label: "קצב רגוע ומדוד, בלי לחץ מתמיד", workStyle: { fastVsCalmPace: -2 } },
-    ],
-  },
-  {
-    id: "ws4",
-    category: "workStyle",
-    mode: "multi",
-    text: "מה מתאר אותך יותר? (אפשר לבחור כמה)",
-    choices: [
-      { label: "אני צריך שמישהו יגדיר לי מסגרת ברורה", workStyle: { independenceVsFramework: -2 } },
-      { label: "אני מעדיף לפעול בעצמאות מלאה, בלי שמישהו עומד לי מעל", workStyle: { independenceVsFramework: 2 } },
-      { label: "אני נהנה לעמוד מול קהל ולהיות במרכז", workStyle: { publicVsBackstage: 2 } },
-      { label: "אני מעדיף לעבוד מאחורי הקלעים, בלי זרקורים", workStyle: { publicVsBackstage: -2 } },
-    ],
-  },
+  riasecLikert("r_i1", "I", "אני נהנה לחקור ולהבין איך דברים עובדים לעומק"),
+  riasecLikert("r_i2", "I", "אני נמשך לפתור חידות או בעיות מורכבות"),
+  riasecLikert("r_i3", "I", "אני אוהב לנתח מידע ולהגיע למסקנות מבוססות"),
+  riasecLikert("r_i5", "I", "אני נהנה להשוות נתונים ולבדוק אילו מסקנות הם באמת תומכים"),
+  riasecLikert("r_i4", "I", "ניתוח מעמיק של בעיות לא ממש מסקרן אותי", true),
 
-  // ============================= Work Values (3) =============================
+  riasecLikert("r_a1", "A", "אני נהנה ליצור דברים חדשים ומקוריים - בכתיבה, עיצוב, מוזיקה או כל צורה אחרת"),
+  riasecLikert("r_a2", "A", "יש לי צורך אמיתי לבטא את עצמי באופן אישי בעבודה שלי"),
+  riasecLikert("r_a3", "A", "אני נמשך לפעילויות שיש בהן מקום לדמיון וחדשנות"),
+  riasecLikert("r_a5", "A", "אני מוצא את עצמי מדמיין דרכים חדשות לעשות דברים מוכרים"),
+  riasecLikert("r_a4", "A", "אני לא צריך הרבה מקום לביטוי יצירתי כדי להרגיש מסופק בעבודה", true),
+
+  riasecLikert("r_s1", "S", "אני נהנה לעזור, ללמד או להדריך אנשים אחרים"),
+  riasecLikert("r_s2", "S", "אכפת לי מאוד מהרווחה של האנשים סביבי"),
+  riasecLikert("r_s3", "S", "אני נמשך לתפקידים שיש בהם קשר אנושי משמעותי"),
+  riasecLikert("r_s5", "S", "אני שם לב כשמישהו לידי צריך עזרה, גם בלי שיבקש"),
+  riasecLikert("r_s4", "S", "אני לא חייב קשר אנושי עמוק כדי ליהנות מהעבודה שלי", true),
+
+  riasecLikert("r_e1", "E", "אני נהנה לשכנע אנשים וליזום דברים חדשים"),
+  riasecLikert("r_e2", "E", "אני נמשך להובלה, ניהול והשפעה על תוצאות"),
+  riasecLikert("r_e3", "E", "אני אוהב לקחת סיכונים מחושבים כשיש סיכוי טוב לרווח"),
+  riasecLikert("r_e5", "E", "אני נהנה להציע רעיונות חדשים ולדחוף אותם קדימה בעצמי"),
+  riasecLikert("r_e4", "E", "אני לא ממש נהנה מלהוביל אנשים אחרים או לשכנע אותם", true),
+
+  riasecLikert("r_c1", "C", "אני נהנה לארגן מידע, נתונים או מסמכים בצורה מסודרת"),
+  riasecLikert("r_c2", "C", "אני מרגיש בנוח כשיש לי נהלים ברורים לעקוב אחריהם"),
+  riasecLikert("r_c3", "C", "אני שם לב לפרטים קטנים ומקפיד על דיוק"),
+  riasecLikert("r_c5", "C", "אני מרגיש בנוח לעקוב אחרי תהליך מוגדר מתחילתו ועד סופו"),
+  riasecLikert("r_c4", "C", "סדר ודיוק קפדני לא ממש חשובים לי בעבודה", true),
+
+  // ============================= Work Style — 16 היגדי Likert (2 לכל ציר) =============================
+  workStyleLikert("ws_aloneVsPeople_1", "aloneVsPeople", "אני מעדיף לעבוד בסביבה עם הרבה אנשים סביבי על פני עבודה שקטה לבד"),
+  workStyleLikert("ws_aloneVsPeople_2", "aloneVsPeople", "גם בעבודה עמוסה, אני שואב אנרגיה מהיותי מוקף באנשים"),
+
+  workStyleLikert("ws_officeVsField_1", "officeVsField", "אני מעדיף להיות בתנועה ובשטח על פני ישיבה קבועה במשרד"),
+  workStyleLikert("ws_officeVsField_2", "officeVsField", "אני מעדיף להחליף מקומות ולזוז לאורך היום על פני לשבת באותו מקום"),
+
+  workStyleLikert("ws_handsVsThinking_1", "handsVsThinking", "אני מעדיף משימות שדורשות חשיבה וניתוח על פני עבודה ידנית"),
+  workStyleLikert("ws_handsVsThinking_2", "handsVsThinking", "אני נהנה יותר מפתרון בעיה בראש מאשר מביצוע שלה בפועל"),
+
+  workStyleLikert("ws_routineVsVariety_1", "routineVsVariety", "אני מעדיף שכל יום עבודה יהיה שונה מקודמו על פני שגרה קבועה"),
+  workStyleLikert("ws_routineVsVariety_2", "routineVsVariety", "שגרה קבועה מדי גורמת לי להרגיש חנוק"),
+
+  workStyleLikert(
+    "ws_structureVsAmbiguity_1",
+    "structureVsAmbiguity",
+    "אני מעדיף חופש לפרש ולהחליט בעצמי על פני הנחיות מדויקות מראש",
+  ),
+  workStyleLikert(
+    "ws_structureVsAmbiguity_2",
+    "structureVsAmbiguity",
+    "אני מסתדר טוב גם כשאין לי הנחיות מדויקות על איך לבצע משימה",
+  ),
+
+  workStyleLikert("ws_fastVsCalmPace_1", "fastVsCalmPace", "אני מעדיף קצב עבודה מהיר ותחת לחץ על פני קצב רגוע ומדוד"),
+  workStyleLikert("ws_fastVsCalmPace_2", "fastVsCalmPace", "אני מתפקד הכי טוב כשיש עומס ולחץ זמן"),
+
+  workStyleLikert(
+    "ws_independenceVsFramework_1",
+    "independenceVsFramework",
+    "אני מעדיף לפעול בעצמאות מלאה על פני מסגרת ברורה והנחיה צמודה",
+  ),
+  workStyleLikert(
+    "ws_independenceVsFramework_2",
+    "independenceVsFramework",
+    "אני מעדיף לקבוע לבד את סדר העדיפויות שלי בעבודה",
+  ),
+
+  workStyleLikert("ws_publicVsBackstage_1", "publicVsBackstage", "אני מעדיף לעמוד מול קהל ולהיות במרכז על פני עבודה מאחורי הקלעים"),
+  workStyleLikert("ws_publicVsBackstage_2", "publicVsBackstage", "אני נהנה להיות מי שמציג ומדבר בשם הקבוצה"),
+
+  // ============================= Work Values — 3 שאלות איפסטיביות (במכוון - ראו הערה למעלה) =============================
   {
-    id: "wv1",
+    id: "wv_top3",
     category: "workValues",
     mode: "multi",
-    text: "מתוך הרשימה הבאה, מה הכי חשוב לך בעבודה? (בחר עד 2)",
-    choices: [
-      { label: "יציבות — לדעת למה לצפות", workValues: { stability: 3 } },
-      { label: "ביטחון תעסוקתי — שלא יפטרו אותי בקלות", workValues: { jobSecurity: 3 } },
-      { label: "הכנסה גבוהה", workValues: { income: 3 } },
-      { label: "עצמאות בעבודה", workValues: { independence: 3 } },
-      { label: "גמישות בשעות ובמקום העבודה", workValues: { flexibility: 3 } },
-    ],
+    maxSelect: 3,
+    text: "מתוך הרשימה הבאה, אילו שלושה דברים הכי חשובים לך בעבודה?",
+    hint: "בחר עד 3",
+    choices: WORK_VALUE_KEYS.map((k) => ({ label: WORK_VALUE_LABELS[k], workValues: { [k]: 3 } as Partial<WorkValueScores> })),
   },
   {
-    id: "wv2",
+    id: "wv_least",
     category: "workValues",
     mode: "multi",
-    text: "ומה מבין אלה הכי חשוב לך? (בחר עד 2)",
-    choices: [
-      { label: "שליחות — להרגיש שאני תורם למשהו גדול ממני", workValues: { mission: 3 } },
-      { label: "משמעות אישית בעבודה עצמה", workValues: { meaning: 3 } },
-      { label: "קידום והתקדמות בסולם הדרגות", workValues: { advancement: 3 } },
-      { label: "מקום לביטוי יצירתי", workValues: { creativity: 3 } },
-      { label: "איזון בין עבודה לחיים האישיים", workValues: { balance: 3 } },
-    ],
+    maxSelect: 2,
+    text: "ואילו שניים מהרשימה הכי פחות חשובים לך, גם אם הם נחמדים באופן כללי?",
+    hint: "בחר עד 2",
+    choices: WORK_VALUE_KEYS.map((k) => ({ label: WORK_VALUE_LABELS[k], workValues: { [k]: -2 } as Partial<WorkValueScores> })),
   },
   {
-    id: "wv3",
+    id: "wv_ultimate",
     category: "workValues",
     mode: "single",
-    text: "אם היית צריך לבחור רק דבר אחד שהכי יגדיר עבורך \"עבודה טובה\", מה הוא היה?",
-    choices: [
-      { label: "יציבות", workValues: { stability: 3 } },
-      { label: "ביטחון תעסוקתי", workValues: { jobSecurity: 3 } },
-      { label: "הכנסה גבוהה", workValues: { income: 3 } },
-      { label: "עצמאות", workValues: { independence: 3 } },
-      { label: "שליחות", workValues: { mission: 3 } },
-      { label: "משמעות אישית", workValues: { meaning: 3 } },
-      { label: "קידום", workValues: { advancement: 3 } },
-      { label: "יצירתיות", workValues: { creativity: 3 } },
-      { label: "איזון חיים-עבודה", workValues: { balance: 3 } },
-      { label: "גמישות", workValues: { flexibility: 3 } },
-    ],
+    text: "ולסיום — אם היית צריך לבחור רק דבר אחד שהכי יגדיר עבורך \"עבודה טובה\", מה הוא היה?",
+    choices: WORK_VALUE_KEYS.map((k) => ({ label: WORK_VALUE_LABELS[k], workValues: { [k]: 3 } as Partial<WorkValueScores> })),
   },
 
-  // ============================= Validation (1) =============================
+  // ============================= Meta — אינה מנוקדת =============================
   {
-    id: "val1",
-    category: "validation",
+    id: "meta_confidence",
+    category: "meta",
     mode: "single",
-    text: "ולסיום — אם היית צריך לתמצת את עצמך במשפט אחד, מה הכי מתאר אותך?",
+    text: "עד כמה קל היה לך לענות על השאלות?",
     choices: [
-      { label: "אני אדם מעשי שעושה ולא רק מדבר", riasec: { R: 1 }, validationLetter: "R" },
-      { label: "אני אדם שחייב להבין לעומק לפני שהוא פועל", riasec: { I: 1 }, validationLetter: "I" },
-      { label: "אני אדם עם דמיון וצורך ליצור", riasec: { A: 1 }, validationLetter: "A" },
-      { label: "אני אדם שחי בשביל לעזור ולהיות עם אנשים", riasec: { S: 1 }, validationLetter: "S" },
-      { label: "אני אדם שרודף הזדמנויות ומוביל", riasec: { E: 1 }, validationLetter: "E" },
-      { label: "אני אדם מסודר שאי אפשר להפתיע", riasec: { C: 1 }, validationLetter: "C" },
+      { label: "קל מאוד - ידעתי בדיוק מה לענות", meta: "easy" },
+      { label: "בסדר, אבל כמה תשובות היו לא חד-משמעיות", meta: "mixed" },
+      { label: "לא קל - הרבה תשובות הרגישו לא מדויקות לגבי", meta: "hard" },
     ],
   },
 ];
 
 export const TOTAL_QUESTIONS = QUESTIONS.length;
+export const RIASEC_QUESTION_IDS = QUESTIONS.filter((q) => q.category === "riasec").map((q) => q.id);
+export const WORK_STYLE_QUESTION_IDS = QUESTIONS.filter((q) => q.category === "workStyle").map((q) => q.id);
 
 // --------------------------------- Scoring Engine ---------------------------------
-// מנוע הניקוד מופרד לחלוטין מה-UI. UI שולח רק Record<questionId, selectedChoiceIndexes[]>.
 
 export type AnswerMap = Record<string, number[]>;
 
@@ -693,19 +434,13 @@ export function computeRawTotals(answers: AnswerMap): RawTotals {
       const choice = q.choices[i];
       if (!choice) continue;
       if (choice.riasec) {
-        for (const [k, v] of Object.entries(choice.riasec)) {
-          riasec[k as RiasecKey] += v ?? 0;
-        }
+        for (const [k, v] of Object.entries(choice.riasec)) riasec[k as RiasecKey] += v ?? 0;
       }
       if (choice.workStyle) {
-        for (const [k, v] of Object.entries(choice.workStyle)) {
-          workStyle[k as WorkStyleKey] += v ?? 0;
-        }
+        for (const [k, v] of Object.entries(choice.workStyle)) workStyle[k as WorkStyleKey] += v ?? 0;
       }
       if (choice.workValues) {
-        for (const [k, v] of Object.entries(choice.workValues)) {
-          workValues[k as WorkValueKey] += v ?? 0;
-        }
+        for (const [k, v] of Object.entries(choice.workValues)) workValues[k as WorkValueKey] += v ?? 0;
       }
     }
   }
@@ -714,57 +449,165 @@ export function computeRawTotals(answers: AnswerMap): RawTotals {
 }
 
 /**
- * הסכום המקסימלי התיאורטי שניתן לצבור לכל מפתח, מחושב מתוך מבנה השאלות עצמו
- * (סכום הערכים המוחלטים של כל המשקלים הרלוונטיים על פני כל השאלות).
- * זה מבטיח נורמליזציה שמותאמת אוטומטית למספר השאלות ולמשקלים בפועל,
- * ולא תלויה בקבועים שרירותיים שעלולים להתיישן כשהשאלון משתנה.
+ * טווח (מינימום, מקסימום) תיאורטי לכל מפתח, מחושב אוטומטית ממבנה השאלות עצמו.
+ * ראו תיעוד מלא בגרסה הקודמת - הלוגיקה לא השתנתה, רק גדל מספר הפריטים שנסרקים.
  */
-function computeMaxAbs<K extends string>(
+function computeKeyRange<K extends string>(
   extractor: (choice: Choice) => Partial<Record<K, number>> | undefined,
   categoryFilter?: QuestionCategory,
-): Record<K, number> {
-  const max: Record<string, number> = {};
+): Record<K, { min: number; max: number }> {
+  const ranges: Record<string, { min: number; max: number }> = {};
+
   for (const q of QUESTIONS) {
     if (categoryFilter && q.category !== categoryFilter) continue;
+    const weightsPerKey: Record<string, number[]> = {};
     for (const choice of q.choices) {
       const weights = extractor(choice);
       if (!weights) continue;
       for (const [k, v] of Object.entries(weights)) {
-        const abs = Math.abs((v as number) ?? 0);
-        max[k] = (max[k] ?? 0) + abs;
+        (weightsPerKey[k] ??= []).push((v as number) ?? 0);
       }
     }
+    for (const [k, weights] of Object.entries(weightsPerKey)) {
+      const fullyCovered = q.mode === "single" && weights.length === q.choices.length;
+      const min = fullyCovered ? Math.min(...weights) : Math.min(0, ...weights);
+      const max = fullyCovered ? Math.max(...weights) : Math.max(0, ...weights);
+      const prev = ranges[k] ?? { min: 0, max: 0 };
+      ranges[k] = { min: prev.min + min, max: prev.max + max };
+    }
   }
-  return max as Record<K, number>;
+
+  return ranges as Record<K, { min: number; max: number }>;
 }
 
-/** סכום מקסימלי חיובי / שלילי בנפרד — נחוץ לציר דו-קוטבי כמו Work Style */
-function computeMaxSigned<K extends string>(
-  extractor: (choice: Choice) => Partial<Record<K, number>> | undefined,
-): { pos: Record<K, number>; neg: Record<K, number> } {
-  const pos: Record<string, number> = {};
-  const neg: Record<string, number> = {};
+const RIASEC_RANGE = computeKeyRange<RiasecKey>((c) => c.riasec, "riasec");
+const WORK_VALUES_RANGE = computeKeyRange<WorkValueKey>((c) => c.workValues, "workValues");
+
+function percentInRange(raw: number, range: { min: number; max: number } | undefined): number {
+  if (!range || range.max <= range.min) return 50;
+  const pct = ((raw - range.min) / (range.max - range.min)) * 100;
+  return Math.max(0, Math.min(100, Math.round(pct)));
+}
+
+// --------------------------------- Monte-Carlo Null Model ---------------------------------
+// כדי לקבוע סף "גבוה" או "נמוך" בצורה שיש לה משמעות (ולא רק 25/50/75 שרירותי),
+// מדמים "עונה אקראי" על אותו שאלון בדיוק אלפי פעמים, ומודדים איפה באמת מתרכזות
+// התוצאות במקרה של מענה אקראי לגמרי. PRNG עם seed קבוע -> תוצאה זהה בכל טעינה.
+
+function mulberry32(seed: number) {
+  let a = seed;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function simulateRandomAnswers(rand: () => number): AnswerMap {
+  const answers: AnswerMap = {};
   for (const q of QUESTIONS) {
-    for (const choice of q.choices) {
-      const weights = extractor(choice);
-      if (!weights) continue;
-      for (const [k, v] of Object.entries(weights)) {
-        const val = (v as number) ?? 0;
-        if (val > 0) pos[k] = (pos[k] ?? 0) + val;
-        else if (val < 0) neg[k] = (neg[k] ?? 0) + Math.abs(val);
+    if (q.mode === "single") {
+      answers[q.id] = [Math.floor(rand() * q.choices.length)];
+    } else {
+      const maxN = q.maxSelect ?? q.choices.length;
+      const count = 1 + Math.floor(rand() * maxN); // עונה אקראי "סביר" בוחר לפחות אפשרות אחת
+      const pool = q.choices.map((_, i) => i);
+      const picked: number[] = [];
+      for (let n = 0; n < count && pool.length > 0; n++) {
+        const idx = Math.floor(rand() * pool.length);
+        picked.push(pool[idx]);
+        pool.splice(idx, 1);
       }
+      answers[q.id] = picked;
     }
   }
-  return { pos: pos as Record<K, number>, neg: neg as Record<K, number> };
+  return answers;
 }
 
-const RIASEC_MAX = computeMaxAbs<RiasecKey>((c) => c.riasec, "riasec");
-// לצירך העמסת ה-Work Values/Style, לא מסננים לפי קטגוריה כי המפתחות ייחודיים ממילא לקטגוריה שלהם.
-const WORK_VALUES_MAX = computeMaxAbs<WorkValueKey>((c) => c.workValues);
-const WORK_STYLE_SIGNED = computeMaxSigned<WorkStyleKey>((c) => c.workStyle);
+interface NullStats {
+  mean: number;
+  sd: number;
+}
+
+/**
+ * מדד עקביות Split-Half בלבד (ללא reverse-mismatch/straight-lining), מחושב מתוך
+ * תשובות גולמיות. מופרד מ-checkConsistency כדי שניתן יהיה להריץ אותו בתוך סימולציית
+ * המודל האקראי בלי תלות מעגלית ב-NULL_MODEL עצמו.
+ */
+function computeResponseConsistencyScore(answers: AnswerMap): number {
+  const agreements: number[] = [];
+  for (const key of RIASEC_KEYS) {
+    const { halfA, halfB } = RELIABILITY_ITEM_MAP[key];
+    const ratingsA = halfA.map((id) => answers[id]?.[0]).filter((v): v is number => v != null).map((i) => i + 1);
+    const ratingsB = halfB.map((id) => answers[id]?.[0]).filter((v): v is number => v != null).map((i) => i + 1);
+    if (ratingsA.length > 0 && ratingsB.length > 0) {
+      const avgA = ratingsA.reduce((a, b) => a + b, 0) / ratingsA.length;
+      const avgB = ratingsB.reduce((a, b) => a + b, 0) / ratingsB.length;
+      agreements.push(100 - (Math.abs(avgA - avgB) / 3) * 100);
+    }
+  }
+  for (const key of WORK_STYLE_KEYS) {
+    const [id1, id2] = WORK_STYLE_ITEM_PAIRS[key];
+    const r1 = answers[id1]?.[0];
+    const r2 = answers[id2]?.[0];
+    if (r1 != null && r2 != null) agreements.push(100 - (Math.abs(r1 - r2) / 3) * 100);
+  }
+  return agreements.length > 0 ? Math.round(agreements.reduce((a, b) => a + b, 0) / agreements.length) : 100;
+}
+
+function buildNullModel(): {
+  riasec: Record<RiasecKey, NullStats>;
+  workValues: Record<WorkValueKey, NullStats>;
+  consistency: NullStats;
+} {
+  const N = 4000;
+  const rand = mulberry32(20260907); // seed קבוע - דטרמיניזם מלא בין טעינות
+  const riasecSamples: Record<RiasecKey, number[]> = { R: [], I: [], A: [], S: [], E: [], C: [] };
+  const valueSamples: Record<WorkValueKey, number[]> = Object.fromEntries(
+    WORK_VALUE_KEYS.map((k) => [k, [] as number[]]),
+  ) as Record<WorkValueKey, number[]>;
+  const consistencySamples: number[] = [];
+
+  for (let n = 0; n < N; n++) {
+    const answers = simulateRandomAnswers(rand);
+    const totals = computeRawTotals(answers);
+    for (const k of RIASEC_KEYS) riasecSamples[k].push(percentInRange(totals.riasec[k], RIASEC_RANGE[k]));
+    for (const k of WORK_VALUE_KEYS) valueSamples[k].push(percentInRange(totals.workValues[k], WORK_VALUES_RANGE[k]));
+    consistencySamples.push(computeResponseConsistencyScore(answers));
+  }
+
+  const stats = (arr: number[]): NullStats => {
+    const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+    const variance = arr.reduce((a, b) => a + (b - mean) ** 2, 0) / arr.length;
+    return { mean, sd: Math.sqrt(variance) };
+  };
+
+  return {
+    riasec: Object.fromEntries(RIASEC_KEYS.map((k) => [k, stats(riasecSamples[k])])) as Record<RiasecKey, NullStats>,
+    workValues: Object.fromEntries(WORK_VALUE_KEYS.map((k) => [k, stats(valueSamples[k])])) as Record<
+      WorkValueKey,
+      NullStats
+    >,
+    consistency: stats(consistencySamples),
+  };
+}
+
+const NULL_MODEL = buildNullModel();
 
 export type Level = "נמוך" | "בינוני" | "גבוה" | "גבוה מאוד";
 
+/** רמה יחסית למודל האקראי (z-score מול "עונה אקראי" על אותו שאלון), לא סף שרירותי */
+function levelFromZ(percent: number, ref: NullStats): Level {
+  const z = (percent - ref.mean) / Math.max(ref.sd, 1e-6);
+  if (z < -0.5) return "נמוך";
+  if (z < 0.5) return "בינוני";
+  if (z < 1.5) return "גבוה";
+  return "גבוה מאוד";
+}
+
+/** גרסה כללית (לא מבוססת מודל אקראי) - נשארת בשימוש עבור Work Style, ששם הסמנטיקה שונה (מרחק מנקודת אמצע) */
 export function levelFromPercent(p: number): Level {
   if (p >= 75) return "גבוה מאוד";
   if (p >= 50) return "גבוה";
@@ -775,20 +618,20 @@ export function levelFromPercent(p: number): Level {
 export interface RiasecDimension {
   key: RiasecKey;
   raw: number;
-  /** אחוז מתוך המקסימום התיאורטי - משמש לרמות (נמוך/בינוני/גבוה/גבוה מאוד) */
   percentOfMax: number;
-  /** אחוז יחסי לממד החזק ביותר אצל המשתמש - משמש להצגה גרפית (רדאר) */
-  relativePercent: number;
   level: Level;
+  /** האם הממד הזה גבוה משמעותית ממה שהיה יוצא ממענה אקראי לגמרי על אותו שאלון */
+  aboveRandomBaseline: boolean;
   info: TypeInfo;
 }
 
 export interface WorkStyleDimension {
   key: WorkStyleKey;
-  /** 100- עד 100, שלילי = קוטב neg, חיובי = קוטב pos */
   value: number;
   level: "מאוזן" | Level;
   dominant: "neg" | "pos" | "מאוזן";
+  /** התאמה בין שני הפריטים העצמאיים שמודדים את אותו ציר (0-100) */
+  itemAgreement: number;
   info: WorkStyleAxisInfo;
 }
 
@@ -799,65 +642,97 @@ export interface WorkValueDimension {
   label: string;
 }
 
+export interface ConsistencyReport {
+  reverseMismatchCount: number;
+  straightLining: boolean;
+  /** מדד עקביות תשובות של המשתמש הזה בלבד (Split-Half על הפריטים בפועל) - לא מקדם מהימנות אוכלוסייה */
+  responseConsistencyScore: number; // 0-100
+  reliable: boolean;
+}
+
 export interface Profile {
-  riasec: RiasecDimension[]; // ממוין מהחזק לחלש
+  riasec: RiasecDimension[];
   top: RiasecKey[];
   hollandCode: string;
   workStyle: WorkStyleDimension[];
-  workValues: WorkValueDimension[]; // ממוין מהחזק לחלש
-  /** האם התשובה בשאלת הכיול תואמת את הממד החזק ביותר שחושב מהשאלון */
-  validationConsistent: boolean | null;
-  /** האם המשתמש דילג על שאלות רבות מדי - משפיע על אמינות התוצאה */
+  workValues: WorkValueDimension[];
+  consistency: ConsistencyReport;
+  selfReportedDifficulty: "easy" | "mixed" | "hard" | null;
   lowConfidence: boolean;
 }
 
-export function buildProfile(
-  totals: RawTotals,
-  opts?: { validationLetter?: RiasecKey | null; skippedCount?: number },
-): Profile {
-  const riasecMaxSelf = Math.max(1, ...RIASEC_KEYS.map((k) => totals.riasec[k]));
+function checkConsistency(answers: AnswerMap): ConsistencyReport {
+  let reverseMismatchCount = 0;
 
+  for (const key of RIASEC_KEYS) {
+    const { halfA, halfB, reverseId } = RELIABILITY_ITEM_MAP[key];
+    const forwardAll = [...halfA, ...halfB]
+      .map((id) => answers[id]?.[0])
+      .filter((v): v is number => v != null)
+      .map((i) => i + 1);
+    const reverseIdx = answers[reverseId]?.[0];
+    if (forwardAll.length > 0 && reverseIdx != null) {
+      const forwardAvg = forwardAll.reduce((a, b) => a + b, 0) / forwardAll.length;
+      const reverseFlipped = 5 - (reverseIdx + 1);
+      if (Math.abs(forwardAvg - reverseFlipped) > 1.5) reverseMismatchCount += 1;
+    }
+  }
+
+  const responseConsistencyScore = computeResponseConsistencyScore(answers);
+
+  const allRatingIds = [...RIASEC_QUESTION_IDS, ...WORK_STYLE_QUESTION_IDS];
+  const allRatings = allRatingIds.map((id) => answers[id]?.[0]).filter((v): v is number => v != null);
+  const straightLining = allRatings.length >= 30 && new Set(allRatings).size <= 1;
+
+  // "אמין" = עקביות התשובות גבוהה משמעותית (z >= 0.5) ממה שהיה יוצא ממענה אקראי
+  // לגמרי על אותו שאלון בדיוק - לא סף שרירותי. ראו NULL_MODEL.consistency.
+  const consistencyZ = (responseConsistencyScore - NULL_MODEL.consistency.mean) / Math.max(NULL_MODEL.consistency.sd, 1e-6);
+  const reliable = reverseMismatchCount <= 1 && !straightLining && consistencyZ >= 0.5;
+
+  return { reverseMismatchCount, straightLining, responseConsistencyScore, reliable };
+}
+
+export function buildProfile(answers: AnswerMap, totals: RawTotals, opts?: { skippedCount?: number }): Profile {
   const riasec: RiasecDimension[] = [...RIASEC_KEYS]
     .map((k) => {
       const raw = totals.riasec[k];
-      const maxTheoretical = Math.max(1, RIASEC_MAX[k] ?? 1);
-      const percentOfMax = Math.round((raw / maxTheoretical) * 100);
-      const relativePercent = Math.round((raw / riasecMaxSelf) * 100);
-      return {
-        key: k,
-        raw,
-        percentOfMax: Math.max(0, Math.min(100, percentOfMax)),
-        relativePercent: Math.max(0, Math.min(100, relativePercent)),
-        level: levelFromPercent(percentOfMax),
-        info: TYPES[k],
-      };
+      const percentOfMax = percentInRange(raw, RIASEC_RANGE[k]);
+      const ref = NULL_MODEL.riasec[k];
+      const level = levelFromZ(percentOfMax, ref);
+      const aboveRandomBaseline = percentOfMax > ref.mean + 0.5 * ref.sd;
+      return { key: k, raw, percentOfMax, level, aboveRandomBaseline, info: TYPES[k] };
     })
     .sort((a, b) => b.raw - a.raw);
 
-  const top = riasec.slice(0, 3).map((d) => d.key).filter((k) => totals.riasec[k] > 0);
+  const top = riasec.slice(0, 3).map((d) => d.key).filter((k) => riasec.find((d) => d.key === k)!.aboveRandomBaseline);
 
   const workStyle: WorkStyleDimension[] = WORK_STYLE_KEYS.map((k) => {
     const raw = totals.workStyle[k];
-    const maxPos = Math.max(1, WORK_STYLE_SIGNED.pos[k] ?? 1);
-    const maxNeg = Math.max(1, WORK_STYLE_SIGNED.neg[k] ?? 1);
-    const denom = raw >= 0 ? maxPos : maxNeg;
-    const value = Math.round(Math.max(-100, Math.min(100, (raw / denom) * 100)));
+    const value = Math.max(-100, Math.min(100, Math.round(raw / 2))); // ממוצע 2 פריטים, כל אחד עד 100-100
     const dominant: "neg" | "pos" | "מאוזן" = value > 20 ? "pos" : value < -20 ? "neg" : "מאוזן";
     const level = dominant === "מאוזן" ? "מאוזן" : levelFromPercent(Math.abs(value));
-    return { key: k, value, level, dominant, info: WORK_STYLE_AXES[k] };
+    const [id1, id2] = WORK_STYLE_ITEM_PAIRS[k];
+    const r1 = answers[id1]?.[0];
+    const r2 = answers[id2]?.[0];
+    const itemAgreement = r1 != null && r2 != null ? Math.round(100 - (Math.abs(r1 - r2) / 3) * 100) : 100;
+    return { key: k, value, level, dominant, itemAgreement, info: WORK_STYLE_AXES[k] };
   });
 
   const workValues: WorkValueDimension[] = WORK_VALUE_KEYS.map((k) => {
     const raw = totals.workValues[k];
-    const maxTheoretical = Math.max(1, WORK_VALUES_MAX[k] ?? 1);
-    const percentOfMax = Math.max(0, Math.min(100, Math.round((raw / maxTheoretical) * 100)));
-    return { key: k, percentOfMax, level: levelFromPercent(percentOfMax), label: WORK_VALUE_LABELS[k] };
+    const percentOfMax = percentInRange(raw, WORK_VALUES_RANGE[k]);
+    const level = levelFromZ(percentOfMax, NULL_MODEL.workValues[k]);
+    return { key: k, percentOfMax, level, label: WORK_VALUE_LABELS[k] };
   }).sort((a, b) => b.percentOfMax - a.percentOfMax);
 
-  const validationConsistent =
-    opts?.validationLetter != null && top.length > 0 ? top[0] === opts.validationLetter : null;
+  const metaChoiceIdx = answers["meta_confidence"]?.[0];
+  const selfReportedDifficulty =
+    metaChoiceIdx != null
+      ? (QUESTIONS.find((q) => q.id === "meta_confidence")?.choices[metaChoiceIdx]?.meta ?? null)
+      : null;
 
-  const lowConfidence = (opts?.skippedCount ?? 0) > 6;
+  const consistency = checkConsistency(answers);
+  const lowConfidence = (opts?.skippedCount ?? 0) > 8;
 
   return {
     riasec,
@@ -865,7 +740,8 @@ export function buildProfile(
     hollandCode: top.join(""),
     workStyle,
     workValues,
-    validationConsistent,
+    consistency,
+    selfReportedDifficulty,
     lowConfidence,
   };
 }
@@ -877,17 +753,14 @@ export interface CareerProfile {
   title: string;
   field: string;
   requirements: string;
-  /** 0-100 לכל ממד RIASEC - כמה הממד חשוב/בולט במקצוע */
   riasec: Scores;
-  /** רק צירים רלוונטיים למקצוע, 100- עד 100 */
   workStyle?: Partial<WorkStyleScores>;
-  /** רק ערכים רלוונטיים, משקל חשיבות 1-3 */
   workValues?: Partial<WorkValueScores>;
 }
 
 export const CAREER_PROFILES: CareerProfile[] = [
   { id: "electrician", title: "חשמלאי מוסמך", field: "טכני ותשתיות", requirements: "קורס חשמלאים מוסמך + התמחות בשטח",
-    riasec: { R: 90, I: 30, A: 10, S: 20, E: 20, C: 40 },
+    riasec: { R: 90, I: 30, A: 10, S: 20, E: 20, C: 45 },
     workStyle: { officeVsField: 70, handsVsThinking: -80, independenceVsFramework: 20 },
     workValues: { stability: 3, income: 2 } },
   { id: "it-tech", title: "טכנאי מחשבים ורשתות", field: "טכני ותשתיות", requirements: "קורס טכנאי מחשבים / הכשרה מקצועית",
@@ -1023,17 +896,17 @@ export const CAREER_PROFILES: CareerProfile[] = [
 
 export interface CareerMatch {
   career: CareerProfile;
-  matchScore: number; // 0-100
-  sharedRiasec: RiasecKey[]; // הממדים שבהם המשתמש והמקצוע גבוהים במקביל
+  matchScore: number;
+  sharedRiasec: RiasecKey[];
   sharedWorkValues: WorkValueKey[];
 }
 
-function riasecCloseness(userRelative: Record<RiasecKey, number>, career: Scores): number {
+function riasecCloseness(userPercent: Record<RiasecKey, number>, career: Scores): number {
   let weightedSum = 0;
   let weightTotal = 0;
   for (const k of RIASEC_KEYS) {
-    const importance = career[k]; // 0-100, כמה חשוב הממד הזה למקצוע
-    const closeness = 100 - Math.abs(userRelative[k] - career[k]);
+    const importance = career[k];
+    const closeness = 100 - Math.abs(userPercent[k] - career[k]);
     weightedSum += importance * Math.max(0, closeness);
     weightTotal += importance;
   }
@@ -1043,13 +916,13 @@ function riasecCloseness(userRelative: Record<RiasecKey, number>, career: Scores
 
 function workStyleCloseness(userStyle: WorkStyleDimension[], careerStyle?: Partial<WorkStyleScores>): number | null {
   if (!careerStyle || Object.keys(careerStyle).length === 0) return null;
+  const userMap = Object.fromEntries(userStyle.map((d) => [d.key, d.value])) as Record<WorkStyleKey, number>;
   let sum = 0;
   let count = 0;
-  const userMap = Object.fromEntries(userStyle.map((d) => [d.key, d.value])) as Record<WorkStyleKey, number>;
   for (const [k, v] of Object.entries(careerStyle)) {
     const target = v ?? 0;
     const userVal = userMap[k as WorkStyleKey] ?? 0;
-    const closeness = 100 - Math.abs(userVal - target) / 2; // הפרש מקסימלי 200 -> 0-100
+    const closeness = 100 - Math.abs(userVal - target) / 2;
     sum += Math.max(0, closeness);
     count += 1;
   }
@@ -1076,25 +949,43 @@ function workValuesCloseness(
 }
 
 /**
- * חישוב Match Score בין פרופיל המשתמש למקצוע, על בסיס RIASEC + Work Style + Work Values יחד.
- * במכוון לא משתמשים בלוגיקה פשטנית של "אות דומיננטית אחת = מקצוע" -
- * ההתאמה משוקללת על פני שלושת המרכיבים, ומקצוע שלא מגדיר Work Style/Values
- * מקבל את מלוא המשקל היחסי שלו מ-RIASEC.
+ * משקלי ההרכבה בין RIASEC / Work Style / Work Values אינם "מספרים שהרגישו נכון" -
+ * הם נגזרים מ:
+ *  (א) אורך המבחן של כל מרכיב (30 / 16 / ~6 פריטים אפקטיביים) כקירוב לאמינות
+ *      היחסית שלו, לפי הרעיון של נוסחת Spearman-Brown (מבחן ארוך יותר = אמין יותר),
+ *  (ב) עדיפות תיאורטית של הולנד לתחומי עניין (RIASEC) כמנבא הראשי להתאמה תעסוקתית,
+ *      עם Work Style ו-Work Values כמתאמים משניים.
+ * הנוסחה המדויקת: משקל בסיס = מספר פריטים, RIASEC מוכפל ב-1.5 (עדיפות תיאורטית),
+ * ואז מנורמל לסכום 1. התוצאה (מעוגלת): 0.65 / 0.24 / 0.11.
  */
+const EFFECTIVE_ITEMS = { riasec: 30, workStyle: 16, workValues: 6 };
+const RIASEC_THEORY_MULTIPLIER = 1.5;
+const RAW_WEIGHTS = {
+  riasec: EFFECTIVE_ITEMS.riasec * RIASEC_THEORY_MULTIPLIER,
+  workStyle: EFFECTIVE_ITEMS.workStyle,
+  workValues: EFFECTIVE_ITEMS.workValues,
+};
+const WEIGHT_SUM = RAW_WEIGHTS.riasec + RAW_WEIGHTS.workStyle + RAW_WEIGHTS.workValues;
+const MATCH_WEIGHTS = {
+  riasec: RAW_WEIGHTS.riasec / WEIGHT_SUM,
+  workStyle: RAW_WEIGHTS.workStyle / WEIGHT_SUM,
+  workValues: RAW_WEIGHTS.workValues / WEIGHT_SUM,
+};
+
 export function matchCareers(profile: Profile, limit = 8): CareerMatch[] {
-  const userRelative = Object.fromEntries(profile.riasec.map((d) => [d.key, d.relativePercent])) as Record<
+  const userPercent = Object.fromEntries(profile.riasec.map((d) => [d.key, d.percentOfMax])) as Record<
     RiasecKey,
     number
   >;
 
   const results: CareerMatch[] = CAREER_PROFILES.map((career) => {
-    const riasecScore = riasecCloseness(userRelative, career.riasec);
+    const riasecScore = riasecCloseness(userPercent, career.riasec);
     const styleScore = workStyleCloseness(profile.workStyle, career.workStyle);
     const { score: valuesScore, shared: sharedWorkValues } = workValuesCloseness(profile.workValues, career.workValues);
 
-    let wRiasec = 0.6;
-    let wStyle = 0.25;
-    let wValues = 0.15;
+    let wRiasec = MATCH_WEIGHTS.riasec;
+    let wStyle = MATCH_WEIGHTS.workStyle;
+    let wValues = MATCH_WEIGHTS.workValues;
 
     if (styleScore == null) {
       wRiasec += wStyle;
@@ -1105,11 +996,8 @@ export function matchCareers(profile: Profile, limit = 8): CareerMatch[] {
       wValues = 0;
     }
 
-    const matchScore = Math.round(
-      wRiasec * riasecScore + wStyle * (styleScore ?? 0) + wValues * (valuesScore ?? 0),
-    );
-
-    const sharedRiasec = RIASEC_KEYS.filter((k) => career.riasec[k] >= 60 && userRelative[k] >= 60);
+    const matchScore = Math.round(wRiasec * riasecScore + wStyle * (styleScore ?? 0) + wValues * (valuesScore ?? 0));
+    const sharedRiasec = RIASEC_KEYS.filter((k) => career.riasec[k] >= 60 && userPercent[k] >= 60);
 
     return { career, matchScore: Math.max(0, Math.min(100, matchScore)), sharedRiasec, sharedWorkValues };
   });
@@ -1117,7 +1005,6 @@ export function matchCareers(profile: Profile, limit = 8): CareerMatch[] {
   return results.sort((a, b) => b.matchScore - a.matchScore).slice(0, limit);
 }
 
-/** מקצועות/סוגי עבודה שעשויים להתאים פחות, לפי הממדים החלשים ביותר של המשתמש */
 export function leastFitNotes(profile: Profile): TypeInfo[] {
   return [...profile.riasec]
     .sort((a, b) => a.raw - b.raw)
@@ -1125,29 +1012,8 @@ export function leastFitNotes(profile: Profile): TypeInfo[] {
     .map((d) => d.info);
 }
 
-// --------------------------------- Helpers כלליים ---------------------------------
+// --------------------------------- Storage keys ---------------------------------
 
-export function computeTop(scores: Scores, count = 3): RiasecKey[] {
-  return [...RIASEC_KEYS]
-    .sort((a, b) => scores[b] - scores[a])
-    .slice(0, count)
-    .filter((k) => scores[k] > 0);
-}
-
-export function hollandCode(top: RiasecKey[]): string {
-  return top.slice(0, 3).join("");
-}
-
-/** נורמליזציה יחסית לממד החזק ביותר אצל המשתמש - משמשת לתצוגה גרפית (רדאר) בלבד */
-export function normalize(scores: Scores): { key: RiasecKey; value: number; label: string }[] {
-  const max = Math.max(1, ...RIASEC_KEYS.map((k) => scores[k]));
-  return RIASEC_KEYS.map((k) => ({
-    key: k,
-    value: Math.round((scores[k] / max) * 100),
-    label: TYPES[k].title.split(" ")[0] ?? TYPES[k].key,
-  }));
-}
-
-export const STORAGE_KEY = "riasec-progress-v2";
-export const RESULT_KEY = "riasec-result-v2";
+export const STORAGE_KEY = "riasec-progress-v4";
+export const RESULT_KEY = "riasec-result-v4";
 export const WHATSAPP_GROUP = "https://chat.whatsapp.com/EfbcQPOzYc823iSisDwizd?s=cl&p=a&mlu=4";
