@@ -74,7 +74,7 @@ function Results() {
   const { profile } = result;
   const radarData = profile.riasec.map((d) => ({
     label: d.info.title.split(" ")[0] ?? d.key,
-    value: d.relativePercent,
+    value: d.percentOfMax,
   }));
 
   const matches: CareerMatch[] = matchCareers(profile, 8);
@@ -148,18 +148,31 @@ function Results() {
           </p>
         </div>
       )}
-      {profile.validationConsistent === false && (
+      {!profile.consistency.reliable && (
         <div className="glass mt-3 flex items-start gap-3 border border-amber-500/30 p-4 text-sm">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
           <p className="text-muted-foreground">
-            שים לב: התשובה שלך בשאלה המסכמת לא תאמה במדויק את הנטייה החזקה ביותר שעלתה מהשאלון. זה קורה, ולרוב אומר
-            שיש לך יותר מצד אחד בולט - כדאי לקרוא את כל הדוח ולא רק את הכותרת.
+            {profile.consistency.straightLining
+              ? "שים לב: זיהינו שנתת תשובה דומה מאוד לרוב השאלות. זה עלול להעיד על מענה מהיר מדי, ומומלץ לעבור על השאלון שוב בעיון."
+              : `שים לב: מדד העקביות הפנימית של התשובות שלך (${profile.consistency.responseConsistencyScore}/100) לא היה גבוה משמעותית ממה שהיה יוצא ממענה אקראי לגמרי על אותו שאלון. זה טבעי ולעיתים משקף פרופיל מורכב, אך כדאי להתייחס לדוח כנקודת פתיחה ולא כתמונה סופית.`}
+          </p>
+        </div>
+      )}
+      {profile.selfReportedDifficulty === "hard" && (
+        <div className="glass mt-3 flex items-start gap-3 border border-amber-500/30 p-4 text-sm">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+          <p className="text-muted-foreground">
+            ציינת שהיה לך קשה לענות על חלק מהשאלות - זה קורה, ולרוב אומר שהתמונה שלך עדיין מתגבשת. שווה לעבור על
+            הדוח בעין ביקורתית ולא להתייחס אליו כפסק דין סופי.
           </p>
         </div>
       )}
 
       <section className="glass-strong mt-8 p-4 sm:p-6">
         <h2 className="text-lg font-bold">מפת הנטיות שלך</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          העוצמה משקפת את מידת ההעדפה שלך בכל ממד, ואינה אחוזון ביחס לאוכלוסייה.
+        </p>
         <div className="mt-2 h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={radarData} outerRadius="72%">
