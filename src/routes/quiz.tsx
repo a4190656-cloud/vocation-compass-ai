@@ -13,7 +13,6 @@ import {
   computeRawTotals,
   buildProfile,
   type AnswerMap,
-  type RiasecKey,
 } from "@/lib/riasec";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -97,6 +96,10 @@ function Quiz() {
       return;
     }
     const cur = answers[question.id] ?? [];
+    if (!cur.includes(i) && question.maxSelect != null && cur.length >= question.maxSelect) {
+      toast.warning(`ניתן לבחור עד ${question.maxSelect} אפשרויות בשאלה הזו`);
+      return;
+    }
     const next = cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i];
     const updated = { ...answers, [question.id]: next };
     setAnswers(updated);
@@ -106,16 +109,7 @@ function Quiz() {
   const finish = async (finalAnswers: AnswerMap, finalSkipped: string[]) => {
     setBusy(true);
     const totals = computeRawTotals(finalAnswers);
-    const validationChoiceIdx = finalAnswers["val1"]?.[0];
-    const validationLetter: RiasecKey | null =
-      validationChoiceIdx != null
-        ? (QUESTIONS.find((q) => q.id === "val1")?.choices[validationChoiceIdx]?.validationLetter ?? null)
-        : null;
-
-    const profile = buildProfile(totals, {
-      validationLetter,
-      skippedCount: finalSkipped.length,
-    });
+    const profile = buildProfile(finalAnswers, totals, { skippedCount: finalSkipped.length });
 
     const result = {
       totals,
@@ -203,7 +197,11 @@ function Quiz() {
         <section className="glass-strong mt-8 p-6 sm:p-8">
           <h1 className="text-xl font-bold leading-relaxed">{question.text}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {question.mode === "single" ? "בחר תשובה אחת" : "ניתן לבחור מספר תשובות · לחיצה נוספת מבטלת בחירה"}
+            {question.mode === "single"
+              ? "בחר תשובה אחת"
+              : question.maxSelect
+                ? `ניתן לבחור עד ${question.maxSelect} תשובות · לחיצה נוספת מבטלת בחירה`
+                : "ניתן לבחור מספר תשובות · לחיצה נוספת מבטלת בחירה"}
           </p>
 
           <div className="mt-6 space-y-3">
