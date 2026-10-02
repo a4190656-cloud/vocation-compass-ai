@@ -1,6 +1,45 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+
 const brainAsset = { url: "/brain-icon.webp" };
 const aoAsset = { url: "/ao-logo.png" };
+
+/** כפתור כניסה קטן ודיסקרטי בפינה — נראה רק לבעלים (מנהל מחובר) */
+function AdminCornerLink() {
+  const [isOwner, setIsOwner] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const check = async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (active) setIsOwner(data.user?.email?.toLowerCase() === OWNER.email);
+      } catch {
+        if (active) setIsOwner(false);
+      }
+    };
+    check();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => check());
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (!isOwner) return null;
+
+  return (
+    <Link
+      to="/auth"
+      aria-label="כניסה לאזור האישי של הניהול"
+      title="כניסה לאזור האישי של הניהול"
+      className="fixed bottom-3 left-3 z-50 grid h-8 w-8 place-items-center rounded-full bg-muted/60 text-xs text-muted-foreground opacity-40 shadow-sm backdrop-blur transition-opacity hover:opacity-100 print:hidden"
+    >
+      <span aria-hidden="true">🔐</span>
+    </Link>
+  );
+}
 
 export function BrandHeader() {
   return (
