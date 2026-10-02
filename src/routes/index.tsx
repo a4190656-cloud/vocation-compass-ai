@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BrandHeader, SiteFooter } from "@/components/brand";
+import { BrandHeader, SiteFooter, COMMUNITY_URL } from "@/components/brand";
 import { useSiteSettings } from "@/lib/site-settings";
 import { STORAGE_KEY } from "@/lib/riasec";
 import { toast } from "sonner";
