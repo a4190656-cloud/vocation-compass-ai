@@ -41,7 +41,7 @@ export const Route = createFileRoute("/results")({
   component: Results,
 });
 
-interface StoredResult {
+export interface StoredResult {
   profile: Profile;
   user?: { name: string; email: string } | null;
 }
@@ -49,10 +49,6 @@ interface StoredResult {
 function Results() {
   const navigate = useNavigate();
   const [result, setResult] = useState<StoredResult | null>(null);
-  const [rating, setRating] = useState(5);
-  const [displayName, setDisplayName] = useState("");
-  const [comment, setComment] = useState("");
-  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     try {
@@ -61,15 +57,21 @@ function Results() {
         navigate({ to: "/" });
         return;
       }
-      const parsed = JSON.parse(raw) as StoredResult;
-      setResult(parsed);
-      setDisplayName(parsed.user?.name ?? "");
+      setResult(JSON.parse(raw) as StoredResult);
     } catch {
       navigate({ to: "/" });
     }
   }, [navigate]);
 
   if (!result) return null;
+  return <ResultsView result={result} />;
+}
+
+export function ResultsView({ result, admin = false }: { result: StoredResult; admin?: boolean }) {
+  const [rating, setRating] = useState(5);
+  const [displayName, setDisplayName] = useState(result.user?.name ?? "");
+  const [comment, setComment] = useState("");
+  const [sent, setSent] = useState(false);
 
   const { profile } = result;
   const radarData = profile.riasec.map((d) => ({
@@ -127,10 +129,21 @@ function Results() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-2">
-      <BrandHeader />
+      {!admin && <BrandHeader />}
+      {!admin && (
+        <section role="status" className="glass-strong mb-6 p-5 text-center">
+          <h2 className="text-lg font-bold text-primary">תודה שסיימת את האבחון! 🎉</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            התשובות שלך התקבלו בהצלחה. נציג מטעמנו יעבור על התוצאות, ייצור איתך קשר בהקדם וישלח אליך
+            לכתובת המייל את הדוח המלא עם ההמלצות האישיות.
+          </p>
+        </section>
+      )}
       <header className="text-center">
         <p className="text-sm text-muted-foreground">
-          {result.user?.name ? `${result.user.name}, הנה הדוח שלך` : "הדוח האישי שלך"}
+          {admin
+            ? `הדוח של ${result.user?.name ?? "משתמש"}${result.user?.email ? ` · ${result.user.email}` : ""}`
+            : result.user?.name ? `${result.user.name}, הנה הדוח שלך` : "הדוח האישי שלך"}
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-black">
           <span className="text-gradient">מצפן</span> — עוזר לי להבין לאן ללכת
@@ -138,6 +151,7 @@ function Results() {
         {main && <p className="mt-3 text-base font-semibold text-primary">{main.title}</p>}
         {main && <p className="mt-2 text-base text-muted-foreground">{main.description}</p>}
       </header>
+
 
       {profile.lowConfidence && (
         <div className="glass mt-6 flex items-start gap-3 border border-amber-500/30 p-4 text-sm">
@@ -325,6 +339,15 @@ function Results() {
         </p>
       </section>
 
+      {admin ? (
+        <section className="mt-8 print:hidden">
+          <Button variant="outline" className="w-full" onClick={() => window.print()}>
+            <Download className="h-4 w-4" />
+            שמירה כ-PDF
+          </Button>
+        </section>
+      ) : (
+      <>
       <section className="mt-8 grid gap-3 sm:grid-cols-3 print:hidden">
         <Button variant="outline" onClick={() => window.print()}>
           <Download className="h-4 w-4" />
@@ -351,6 +374,7 @@ function Results() {
       </section>
 
       <section className="glass mt-10 p-6 print:hidden">
+
         <h2 className="flex items-center gap-2 text-lg font-bold">
           <MessageCircle className="h-5 w-5 text-primary" />
           איך היה האבחון?
@@ -399,6 +423,9 @@ function Results() {
           </div>
         )}
       </section>
+      </>
+      )}
+
 
       <div className="mt-8 text-center print:hidden">
         <Link to="/" className="text-sm text-muted-foreground underline underline-offset-4">

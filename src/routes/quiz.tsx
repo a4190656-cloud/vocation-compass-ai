@@ -128,6 +128,7 @@ function Quiz() {
           workStyle: totals.workStyle,
           workValues: totals.workValues,
           topCareers: profile.top,
+          profile,
         } as unknown as import("@/integrations/supabase/types").Json,
         top_codes: profile.top,
       });
