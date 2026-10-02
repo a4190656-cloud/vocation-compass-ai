@@ -92,15 +92,7 @@ export function SiteFooter() {
           הצהרת נגישות
         </Link>
       </nav>
-      <div className="mt-5">
-        <Link
-          to="/auth"
-          className="glass-strong inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold text-primary shadow-lg transition-transform hover:scale-[1.03]"
-        >
-          <span aria-hidden="true">🔐</span>
-          כניסה לאזור האישי של הניהול
-        </Link>
-      </div>
+      <AdminCornerLink />
       <p className="mt-4 text-[11px] text-muted-foreground">
         © {new Date().getFullYear()} מצפן · כל הזכויות שמורות
       </p>
