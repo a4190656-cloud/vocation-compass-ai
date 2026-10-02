@@ -134,6 +134,8 @@ export function SiteFooter() {
   );
 }
 
+export const COMMUNITY_URL = "https://chat.whatsapp.com/Lr5Tu2CekCN9KP0YAfHPTl";
+
 export const OWNER = {
   name: "מצפן - אבחון תעסוקתי חכם",
   email: "a4190656@gmail.com",
