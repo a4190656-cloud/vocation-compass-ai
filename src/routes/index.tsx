@@ -111,6 +111,8 @@ function Home() {
         .from("reviews")
         .select("id, display_name, rating, comment, created_at")
         .gte("rating", minRating)
+        .eq("approved", true)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(12);
       if (error) throw error;
