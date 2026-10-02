@@ -573,6 +573,9 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
               <p className="mt-1 text-xs text-muted-foreground">{fmt(d.created_at)}</p>
             </button>
             <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="hero" asChild>
+                <Link to="/report/$id" params={{ id: d.id }}>דוח מלא</Link>
+              </Button>
               <Button size="sm" variant="outline" asChild>
                 <a href={`mailto:${d.email}`}>שליחת מייל</a>
               </Button>
