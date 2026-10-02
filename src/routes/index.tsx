@@ -16,11 +16,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "אבחון תעסוקתי חכם בעברית | מצפן" },
-      {
-        name: "description",
-        content:
-          "20 שאלות, ניתוח בינה מלאכותית ודוח אישי עם כיווני קריירה מדויקים. בעברית מלאה.",
-      },
+        {
+          name: "description",
+          content:
+            "20 שאלות, ניתוח חכם ודוח אישי עם כיווני קריירה מדויקים. בעברית מלאה.",
+        },
       { property: "og:title", content: "אבחון תעסוקתי חכם | מצפן" },
       {
         property: "og:description",
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/")({
           url: "https://vocation-compass-ai.lovable.app/",
           inLanguage: "he-IL",
           description:
-            "אבחון נטיות תעסוקתיות בשילוב בינה מלאכותית ודוח אישי מלא בעברית.",
+            "אבחון נטיות תעסוקתיות חכם ודוח אישי מלא בעברית.",
         }),
       },
     ],
@@ -167,12 +167,12 @@ function Home() {
       <header className="mt-4 text-center">
         <img
           src={brainAsset.url}
-          alt="סמל אבחון מבוסס בינה מלאכותית"
+          alt="סמל אבחון חכם"
           className="mx-auto h-24 w-24 drop-shadow-[0_18px_45px_oklch(0.82_0.135_190/45%)]"
         />
         <div className="glass mx-auto mt-6 inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary">
           <Sparkles className="h-4 w-4" />
-          אבחון נטיות תעסוקתיות בשילוב בינה מלאכותית
+          אבחון נטיות תעסוקתיות חכם ומותאם אישית
         </div>
         <h1 className="mt-6 font-[family-name:var(--font-display)] text-4xl font-black leading-tight sm:text-5xl">
           <span className="text-gradient">גלה את הכיוון התעסוקתי</span>
