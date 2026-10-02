@@ -147,7 +147,7 @@ function Admin() {
   });
 
   const log = async (action: string, target_type: string, details: string, target_id?: string) => {
-    await supabase.from("admin_activity").insert({ action, target_type, details, target_id });
+    await supabase.from("admin_activity").insert({ action, target_type, details, target_id: target_id ?? null });
     qc.invalidateQueries({ queryKey: ["admin-activity"] });
   };
 
@@ -368,7 +368,7 @@ function ReviewsTab({ rows, loading, log, refreshAll }: { rows: ReviewRow[]; loa
   const update = async (ids: string[], patch: Partial<ReviewRow>, action: string, msg: string) => {
     if (!ids.length) return;
     const { error } = await supabase.from("reviews").update(patch).in("id", ids);
-    if (error) return toast.error("הפעולה נכשלה");
+    if (error) { toast.error("הפעולה נכשלה"); return; }
     toast.success(msg);
     await log(action, "review", `${ids.length} תגובות`);
     setSelected(new Set());
@@ -379,12 +379,12 @@ function ReviewsTab({ rows, loading, log, refreshAll }: { rows: ReviewRow[]; loa
     const d = edit[r.id];
     if (!d) return;
     const name = d.display_name.trim().slice(0, 40);
-    if (!name) return toast.error("שם מוצג חובה");
+    if (!name) { toast.error("שם מוצג חובה"); return; }
     const { error } = await supabase
       .from("reviews")
       .update({ display_name: name, comment: d.comment.trim().slice(0, 300), rating: d.rating })
       .eq("id", r.id);
-    if (error) return toast.error("השמירה נכשלה");
+    if (error) { toast.error("השמירה נכשלה"); return; }
     setEdit((p) => {
       const n = { ...p };
       delete n[r.id];
@@ -531,7 +531,7 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
 
   const trash = async (r: ResultRow) => {
     const { error } = await supabase.from("diagnoses").update({ deleted_at: new Date().toISOString() }).eq("id", r.id);
-    if (error) return toast.error("הפעולה נכשלה");
+    if (error) { toast.error("הפעולה נכשלה"); return; }
     toast.success("התוצאה הועברה לסל המחזור");
     await log("העברה לסל מחזור", "result", r.full_name, r.id);
     refreshAll();
@@ -540,7 +540,7 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
   const saveNote = async (r: ResultRow) => {
     const note = (notes[r.id] ?? "").slice(0, 1000);
     const { error } = await supabase.from("diagnoses").update({ admin_note: note }).eq("id", r.id);
-    if (error) return toast.error("השמירה נכשלה");
+    if (error) { toast.error("השמירה נכשלה"); return; }
     toast.success("ההערה נשמרה");
     await log("הערה פנימית", "result", r.full_name, r.id);
     refreshAll();
@@ -607,7 +607,7 @@ function TrashTab({ reviews, results, log, refreshAll }: { reviews: ReviewRow[];
     const { error } = restore
       ? await supabase.from(table).update({ deleted_at: null }).eq("id", id)
       : await supabase.from(table).delete().eq("id", id);
-    if (error) return toast.error("הפעולה נכשלה");
+    if (error) { toast.error("הפעולה נכשלה"); return; }
     toast.success(restore ? "שוחזר בהצלחה" : "נמחק לצמיתות");
     await log(restore ? "שחזור מסל מחזור" : "מחיקה לצמיתות", table === "reviews" ? "review" : "result", label, id);
     refreshAll();
@@ -702,7 +702,7 @@ function SettingsTab({ reviews, results, log }: { reviews: ReviewRow[]; results:
       updated_at: new Date().toISOString(),
     }));
     const { error } = await supabase.from("site_settings").upsert(rows);
-    if (error) return toast.error("השמירה נכשלה");
+    if (error) { toast.error("השמירה נכשלה"); return; }
     toast.success("ההגדרות נשמרו ומופיעות באתר");
     await log("עדכון הגדרות אתר", "settings", "");
     qc.invalidateQueries({ queryKey: ["site-settings"] });
@@ -710,10 +710,10 @@ function SettingsTab({ reviews, results, log }: { reviews: ReviewRow[]; results:
   };
 
   const changePw = async () => {
-    if (pw.length < 6) return toast.error("סיסמה של 6 תווים לפחות");
-    if (pw !== pw2) return toast.error("הסיסמאות אינן תואמות");
+    if (pw.length < 6) { toast.error("סיסמה של 6 תווים לפחות"); return; }
+    if (pw !== pw2) { toast.error("הסיסמאות אינן תואמות"); return; }
     const { error } = await supabase.auth.updateUser({ password: pw });
-    if (error) return toast.error("שינוי הסיסמה נכשל");
+    if (error) { toast.error("שינוי הסיסמה נכשל"); return; }
     setPw("");
     setPw2("");
     toast.success("הסיסמה עודכנה");
