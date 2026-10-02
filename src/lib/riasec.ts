@@ -1016,4 +1016,4 @@ export function leastFitNotes(profile: Profile): TypeInfo[] {
 
 export const STORAGE_KEY = "riasec-progress-v4";
 export const RESULT_KEY = "riasec-result-v4";
-export const WHATSAPP_GROUP = "https://chat.whatsapp.com/EfbcQPOzYc823iSisDwizd?s=cl&p=a&mlu=4";
+export const WHATSAPP_GROUP = "https://chat.whatsapp.com/Lr5Tu2CekCN9KP0YAfHPTl";
