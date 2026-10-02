@@ -116,6 +116,14 @@ export function SiteFooter() {
         <Link to="/accessibility" className="underline underline-offset-4 hover:text-primary">
           הצהרת נגישות
         </Link>
+        <a
+          href={COMMUNITY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-4 hover:text-primary"
+        >
+          קהילת וואטסאפ
+        </a>
       </nav>
       <AdminCornerLink />
       <WhatsAppBubble />
@@ -125,6 +133,8 @@ export function SiteFooter() {
     </footer>
   );
 }
+
+export const COMMUNITY_URL = "https://chat.whatsapp.com/Lr5Tu2CekCN9KP0YAfHPTl";
 
 export const OWNER = {
   name: "מצפן - אבחון תעסוקתי חכם",

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BrandHeader, SiteFooter } from "@/components/brand";
+import { BrandHeader, SiteFooter, COMMUNITY_URL } from "@/components/brand";
 import { useSiteSettings } from "@/lib/site-settings";
 import { STORAGE_KEY } from "@/lib/riasec";
 import { toast } from "sonner";
@@ -303,6 +303,33 @@ function Home() {
         </div>
       </section>
       )}
+
+      <section className="glass-strong mt-12 flex flex-col items-center gap-4 p-6 text-center sm:p-8">
+        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#25D366]/15">
+          <svg viewBox="0 0 24 24" className="h-6 w-6 fill-[#25D366]" aria-hidden="true">
+            <path d="M12.04 2a9.9 9.9 0 0 0-8.4 15.2L2 22l4.9-1.6A9.9 9.9 0 1 0 12.04 2Zm5.8 14.1c-.25.7-1.45 1.35-2 1.4-.5.05-1.15.25-3.85-.8-3.25-1.3-5.3-4.6-5.45-4.8-.15-.2-1.3-1.75-1.3-3.35 0-1.6.85-2.4 1.15-2.7.3-.3.65-.4.85-.4h.6c.2 0 .45-.05.7.55.25.6.85 2.1.95 2.25.1.15.15.35.05.55-.1.2-.15.35-.3.55l-.45.5c-.15.15-.3.3-.15.6.15.3.7 1.2 1.5 1.95 1.05.95 1.9 1.25 2.2 1.4.3.15.5.1.65-.05.2-.2.7-.8.9-1.1.2-.3.4-.25.65-.15.25.1 1.65.8 1.95.95.3.15.5.2.55.35.1.15.1.75-.15 1.45Z" />
+          </svg>
+        </span>
+        <div>
+          <h2 className="text-xl font-bold">הקהילה שלנו בוואטסאפ</h2>
+          <p className="mx-auto mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">
+            תמיכה, עדכונים ושיתוף חוויות תעסוקה יחד עם עוד אנשים שנמצאים באותה דרך. הצטרפות
+            בלחיצה אחת.
+          </p>
+        </div>
+        <a
+          href={COMMUNITY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105"
+          style={{ backgroundColor: "#25D366" }}
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+            <path d="M12.04 2a9.9 9.9 0 0 0-8.4 15.2L2 22l4.9-1.6A9.9 9.9 0 1 0 12.04 2Zm5.8 14.1c-.25.7-1.45 1.35-2 1.4-.5.05-1.15.25-3.85-.8-3.25-1.3-5.3-4.6-5.45-4.8-.15-.2-1.3-1.75-1.3-3.35 0-1.6.85-2.4 1.15-2.7.3-.3.65-.4.85-.4h.6c.2 0 .45-.05.7.55.25.6.85 2.1.95 2.25.1.15.15.35.05.55-.1.2-.15.35-.3.55l-.45.5c-.15.15-.3.3-.15.6.15.3.7 1.2 1.5 1.95 1.05.95 1.9 1.25 2.2 1.4.3.15.5.1.65-.05.2-.2.7-.8.9-1.1.2-.3.4-.25.65-.15.25.1 1.65.8 1.95.95.3.15.5.2.55.35.1.15.1.75-.15 1.45Z" />
+          </svg>
+          הצטרפות לקהילה
+        </a>
+      </section>
 
       <SiteFooter />
     </main>
