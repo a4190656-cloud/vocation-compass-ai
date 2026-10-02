@@ -118,6 +118,7 @@ export function SiteFooter() {
         </Link>
       </nav>
       <AdminCornerLink />
+      <WhatsAppBubble />
       <p className="mt-4 text-[11px] text-muted-foreground">
         © {new Date().getFullYear()} מצפן · כל הזכויות שמורות
       </p>
