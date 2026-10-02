@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BrandHeader, SiteFooter } from "@/components/brand";
+import { useSiteSettings } from "@/lib/site-settings";
 import { STORAGE_KEY } from "@/lib/riasec";
 import { toast } from "sonner";
 const brainAsset = { url: "/brain-icon.webp" };
@@ -100,13 +101,16 @@ function Home() {
     }
   }, []);
 
+  const settings = useSiteSettings();
+  const minRating = settings.data?.min_public_rating ?? 4;
   const reviews = useQuery({
-    queryKey: ["reviews"],
+    queryKey: ["reviews", minRating],
+    enabled: settings.isFetched,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("reviews")
         .select("id, display_name, rating, comment, created_at")
-        .gte("rating", 4)
+        .gte("rating", minRating)
         .order("created_at", { ascending: false })
         .limit(12);
       if (error) throw error;
@@ -163,6 +167,11 @@ function Home() {
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pb-16">
       <BrandHeader />
+      {settings.data?.announcement && (
+        <div role="status" className="glass mt-3 p-3 text-center text-sm font-semibold text-primary">
+          {settings.data.announcement}
+        </div>
+      )}
 
       <header className="mt-4 text-center">
         <img
@@ -265,6 +274,7 @@ function Home() {
         </div>
       </section>
 
+      {settings.data?.show_reviews !== false && (
       <section className="mt-12">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold">מה אומרים מי שכבר עברו</h2>
@@ -292,6 +302,7 @@ function Home() {
           )}
         </div>
       </section>
+      )}
 
       <SiteFooter />
     </main>

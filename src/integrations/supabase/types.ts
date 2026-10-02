@@ -14,9 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity: {
+        Row: {
+          action: string
+          created_at: string
+          details: string
+          id: string
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: string
+          id?: string
+          target_id?: string | null
+          target_type?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: string
+          id?: string
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       diagnoses: {
         Row: {
+          admin_note: string
           created_at: string
+          deleted_at: string | null
           email: string
           full_name: string
           id: string
@@ -24,7 +53,9 @@ export type Database = {
           top_codes: string[]
         }
         Insert: {
+          admin_note?: string
           created_at?: string
+          deleted_at?: string | null
           email: string
           full_name: string
           id?: string
@@ -32,7 +63,9 @@ export type Database = {
           top_codes?: string[]
         }
         Update: {
+          admin_note?: string
           created_at?: string
+          deleted_at?: string | null
           email?: string
           full_name?: string
           id?: string
@@ -46,6 +79,7 @@ export type Database = {
           approved: boolean
           comment: string
           created_at: string
+          deleted_at: string | null
           display_name: string
           holland_code: string
           id: string
@@ -55,6 +89,7 @@ export type Database = {
           approved?: boolean
           comment?: string
           created_at?: string
+          deleted_at?: string | null
           display_name: string
           holland_code?: string
           id?: string
@@ -64,10 +99,29 @@ export type Database = {
           approved?: boolean
           comment?: string
           created_at?: string
+          deleted_at?: string | null
           display_name?: string
           holland_code?: string
           id?: string
           rating?: number
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
         }
         Relationships: []
       }
