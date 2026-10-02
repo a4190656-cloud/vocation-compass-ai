@@ -517,7 +517,7 @@ function simulateRandomAnswers(rand: () => number): AnswerMap {
       const picked: number[] = [];
       for (let n = 0; n < count && pool.length > 0; n++) {
         const idx = Math.floor(rand() * pool.length);
-        picked.push(pool[idx]);
+        picked.push(pool[idx]!);
         pool.splice(idx, 1);
       }
       answers[q.id] = picked;
