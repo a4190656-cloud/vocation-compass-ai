@@ -37,7 +37,16 @@ function AuthPage() {
           options: { emailRedirectTo: `${window.location.origin}/admin` },
         });
         if (error) throw error;
-        toast.success("החשבון נוצר, אפשר להתחבר");
+        toast.success("נשלח אליך מייל אימות - יש ללחוץ על הקישור ואז להתחבר");
+        setMode("in");
+        return;
+      }
+      if (mode === "reset") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("נשלח אליך מייל לאיפוס הסיסמה");
         setMode("in");
         return;
       }
