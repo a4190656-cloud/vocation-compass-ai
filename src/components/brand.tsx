@@ -31,7 +31,7 @@ function AdminCornerLink() {
 
   return (
     <Link
-      to="/auth"
+      to="/admin"
       aria-label="כניסה לאזור האישי של הניהול"
       title="כניסה לאזור האישי של הניהול"
       className="fixed bottom-3 left-3 z-50 grid h-8 w-8 place-items-center rounded-full bg-muted/60 text-xs text-muted-foreground opacity-40 shadow-sm backdrop-blur transition-opacity hover:opacity-100 print:hidden"
