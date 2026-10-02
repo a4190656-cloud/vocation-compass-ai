@@ -81,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "אבחון תעסוקתי חכם | מצפן" },
       {
         name: "description",
-        content: "אבחון נטיות תעסוקתיות בשילוב בינה מלאכותית ודוח אישי מלא.",
+        content: "אבחון נטיות תעסוקתיות חכם ודוח אישי מלא.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
