@@ -101,9 +101,27 @@ function Admin() {
   const [tab, setTab] = useState<Tab>("overview");
 
   useEffect(() => {
-    check({})
-      .then((r) => setIsAdmin(r.isAdmin))
-      .catch(() => setIsAdmin(false));
+    let cancelled = false;
+    const run = async (attempt: number): Promise<void> => {
+      try {
+        const r = await check({});
+        if (r.isAdmin || attempt >= 2) {
+          if (!cancelled) setIsAdmin(r.isAdmin);
+          return;
+        }
+      } catch {
+        if (attempt >= 2) {
+          if (!cancelled) setIsAdmin(false);
+          return;
+        }
+      }
+      await new Promise((res) => setTimeout(res, 1000));
+      return run(attempt + 1);
+    };
+    run(0);
+    return () => {
+      cancelled = true;
+    };
   }, [check]);
 
   const reviews = useQuery({
@@ -173,9 +191,12 @@ function Admin() {
         <div className="glass mt-6 p-6 text-center">
           <h1 className="text-lg font-bold">אין לך הרשאת ניהול</h1>
           <p className="mt-2 text-sm text-muted-foreground">החשבון המחובר אינו מוגדר כמנהל המערכת.</p>
-          <Button className="mt-4" variant="outline" onClick={signOut}>
-            התנתקות
-          </Button>
+          <div className="mt-4 flex justify-center gap-2">
+            <Button onClick={() => window.location.reload()}>נסה שוב</Button>
+            <Button variant="outline" onClick={signOut}>
+              התנתקות
+            </Button>
+          </div>
         </div>
       </main>
     );
