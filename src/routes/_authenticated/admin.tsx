@@ -102,8 +102,19 @@ function Admin() {
 
   useEffect(() => {
     let cancelled = false;
+    const directCheck = async (): Promise<boolean> => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return false;
+      const { data } = await supabase.rpc("has_role", { _user_id: u.user.id, _role: "admin" });
+      return Boolean(data);
+    };
     const run = async (attempt: number): Promise<void> => {
       try {
+        // Fast path: ask the database directly from the browser.
+        if (await directCheck().catch(() => false)) {
+          if (!cancelled) setIsAdmin(true);
+          return;
+        }
         const r = await check({});
         if (r.isAdmin || attempt >= 2) {
           if (!cancelled) setIsAdmin(r.isAdmin);
