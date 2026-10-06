@@ -125,6 +125,24 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // Password-reset links may land on any page — send them to the reset page.
+  useEffect(() => {
+    const goReset = () => {
+      if (window.location.pathname !== "/reset-password") {
+        window.location.replace("/reset-password" + window.location.hash);
+      }
+    };
+    if (window.location.hash.includes("type=recovery")) goReset();
+    let sub: { unsubscribe: () => void } | undefined;
+    import("@/integrations/supabase/client").then(({ supabase }) => {
+      sub = supabase.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY") goReset();
+      }).data.subscription;
+    });
+    return () => sub?.unsubscribe();
+  }, []);
+
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
