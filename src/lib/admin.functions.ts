@@ -5,27 +5,29 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const OWNER_EMAIL = "a4190656@gmail.com";
 
 /**
- * Grants the admin role to the owner account on first login,
+ * Grants the admin role to the owner account on login,
  * and reports whether the current user is an admin.
  */
 export const ensureAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = String(context.claims["email"] ?? "").toLowerCase();
 
     if (email === OWNER_EMAIL) {
-      await supabaseAdmin
-        .from("user_roles")
-        .upsert({ user_id: context.userId, role: "admin" }, { onConflict: "user_id,role" });
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        await supabaseAdmin
+          .from("user_roles")
+          .upsert({ user_id: context.userId, role: "admin" }, { onConflict: "user_id,role" });
+      } catch (e) {
+        console.error("ensureAdmin upsert failed", e);
+      }
     }
 
-    const { data } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId)
-      .eq("role", "admin")
-      .maybeSingle();
-
+    const { data, error } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (error) console.error("has_role failed", error);
     return { isAdmin: Boolean(data) };
   });
