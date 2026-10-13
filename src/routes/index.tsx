@@ -56,6 +56,7 @@ export const Route = createFileRoute("/")({
 interface UserInfo {
   name: string;
   email: string;
+  phone?: string;
 }
 
 const FEATURES = [
@@ -80,6 +81,7 @@ function Home() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [hasProgress, setHasProgress] = useState(false);
 
@@ -93,6 +95,7 @@ function Home() {
           if (parsed.user) {
             setName(parsed.user.name ?? "");
             setEmail(parsed.user.email ?? "");
+            setPhone(parsed.user.phone ?? "");
           }
         }
       }
@@ -138,6 +141,11 @@ function Home() {
       toast.error("נא להזין כתובת אימייל תקינה");
       return;
     }
+    const cleanPhone = phone.replace(/[\s-]/g, "");
+    if (!/^0\d{8,9}$/.test(cleanPhone)) {
+      toast.error("נא להזין מספר טלפון תקין (לדוגמה 0501234567)");
+      return;
+    }
     if (!agreed) {
       toast.error("יש לאשר את תנאי השימוש ומדיניות הפרטיות");
       return;
@@ -153,7 +161,7 @@ function Home() {
       STORAGE_KEY,
       JSON.stringify({
         ...existing,
-        user: { name: cleanName, email: cleanEmail },
+        user: { name: cleanName, email: cleanEmail, phone: cleanPhone },
         consentAt: new Date().toISOString(),
       }),
     );
@@ -239,6 +247,20 @@ function Home() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
+              className="h-12 bg-white/5 text-right"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">טלפון</Label>
+            <Input
+              id="phone"
+              type="tel"
+              dir="ltr"
+              inputMode="tel"
+              maxLength={15}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="050-1234567"
               className="h-12 bg-white/5 text-right"
             />
           </div>

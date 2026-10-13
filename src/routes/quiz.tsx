@@ -15,6 +15,37 @@ import {
   type AnswerMap,
 } from "@/lib/riasec";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
+
+const PENDING_KEY = "riasec-pending-save-v1";
+
+/** שמירת אבחון עם ניסיונות חוזרים */
+export async function saveDiagnosis(row: Record<string, unknown>, attempts = 3): Promise<boolean> {
+  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+  console.log("[diagnosis] saving", { id: row.id, hasUrl: Boolean(url), hasKey: Boolean(key), keyPrefix: key?.slice(0, 14) });
+  for (let i = 0; i < attempts; i++) {
+    const { error } = await supabase.from("diagnoses").insert(row as never);
+    if (!error || error.code === "23505") {
+      console.log("[diagnosis] saved", row.id);
+      return true;
+    }
+    console.error(`[diagnosis] save failed (attempt ${i + 1})`, error);
+    await new Promise((r) => setTimeout(r, 800 * (i + 1)));
+  }
+  return false;
+}
+
+/** ניסיון חוזר לשליחת אבחון שנכשל בעבר */
+export async function retryPendingDiagnosis() {
+  const raw = localStorage.getItem(PENDING_KEY);
+  if (!raw) return;
+  try {
+    if (await saveDiagnosis(JSON.parse(raw), 2)) localStorage.removeItem(PENDING_KEY);
+  } catch (e) {
+    console.error("[diagnosis] retry failed", e);
+  }
+}
 
 export const Route = createFileRoute("/quiz")({
   head: () => ({
@@ -41,7 +72,7 @@ interface Saved {
   index?: number;
   answers?: AnswerMap;
   skipped?: string[];
-  user?: { name: string; email: string };
+  user?: { name: string; email: string; phone?: string };
 }
 
 function load(): Saved {
@@ -59,7 +90,7 @@ function Quiz() {
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [skipped, setSkipped] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string; phone?: string } | null>(null);
   const [warnedSkip, setWarnedSkip] = useState(false);
 
   useEffect(() => {
@@ -122,20 +153,30 @@ function Quiz() {
     localStorage.setItem(RESULT_KEY, JSON.stringify(result));
 
     if (user) {
-      const { error } = await supabase.from("diagnoses").insert({
+      const row = {
         id: diagnosisId,
         full_name: user.name,
         email: user.email,
+        phone: user.phone ?? "",
+        answers: finalAnswers as unknown as Json,
         scores: {
           riasec: totals.riasec,
           workStyle: totals.workStyle,
           workValues: totals.workValues,
           topCareers: profile.top,
           profile,
-        } as unknown as import("@/integrations/supabase/types").Json,
+        } as unknown as Json,
         top_codes: profile.top,
-      });
-      if (error) console.error(error);
+        payment_status: "pending",
+        selected_plan: null,
+        payment_method: null,
+        created_at: new Date().toISOString(),
+      };
+      const ok = await saveDiagnosis(row);
+      if (!ok) {
+        localStorage.setItem(PENDING_KEY, JSON.stringify(row));
+        toast.error("חלה שגיאה בשמירת התוצאות, אנא נסה שוב. התשובות נשמרו במכשיר וננסה לשלוח שוב אוטומטית.");
+      }
     }
     localStorage.removeItem(STORAGE_KEY);
     setBusy(false);

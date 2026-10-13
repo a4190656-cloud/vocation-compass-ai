@@ -44,6 +44,7 @@ export type Database = {
       diagnoses: {
         Row: {
           admin_note: string
+          answers: Json
           created_at: string
           deleted_at: string | null
           email: string
@@ -51,6 +52,7 @@ export type Database = {
           id: string
           payment_method: string | null
           payment_status: string
+          phone: string
           scores: Json
           selected_plan: string | null
           top_codes: string[]
@@ -58,6 +60,7 @@ export type Database = {
         }
         Insert: {
           admin_note?: string
+          answers?: Json
           created_at?: string
           deleted_at?: string | null
           email: string
@@ -65,6 +68,7 @@ export type Database = {
           id?: string
           payment_method?: string | null
           payment_status?: string
+          phone?: string
           scores?: Json
           selected_plan?: string | null
           top_codes?: string[]
@@ -72,6 +76,7 @@ export type Database = {
         }
         Update: {
           admin_note?: string
+          answers?: Json
           created_at?: string
           deleted_at?: string | null
           email?: string
@@ -79,6 +84,7 @@ export type Database = {
           id?: string
           payment_method?: string | null
           payment_status?: string
+          phone?: string
           scores?: Json
           selected_plan?: string | null
           top_codes?: string[]

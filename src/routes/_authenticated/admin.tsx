@@ -54,6 +54,7 @@ interface ResultRow {
   id: string;
   full_name: string;
   email: string;
+  phone: string;
   top_codes: string[];
   created_at: string;
   deleted_at: string | null;
@@ -158,12 +159,25 @@ function Admin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("diagnoses")
-        .select("id, full_name, email, top_codes, created_at, deleted_at, admin_note, selected_plan, payment_method, payment_status, unlocked_at")
+        .select("id, full_name, email, phone, top_codes, created_at, deleted_at, admin_note, selected_plan, payment_method, payment_status, unlocked_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as ResultRow[];
     },
   });
+
+  useEffect(() => {
+    if (isAdmin !== true) return;
+    const channel = supabase
+      .channel("admin-diagnoses")
+      .on("postgres_changes", { event: "*", schema: "public", table: "diagnoses" }, () => {
+        qc.invalidateQueries({ queryKey: ["admin-results"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, qc]);
 
   const activity = useQuery({
     queryKey: ["admin-activity"],
@@ -573,7 +587,7 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
   const list = rows.filter((r) => {
     if (pay !== "all" && r.payment_status !== pay) return false;
     const s = q.trim().toLowerCase();
-    const okQ = !s || r.full_name.toLowerCase().includes(s) || r.email.toLowerCase().includes(s);
+    const okQ = !s || r.full_name.toLowerCase().includes(s) || r.email.toLowerCase().includes(s) || (r.phone ?? "").includes(s);
     const okR = range === "all" || +new Date(r.created_at) > Date.now() - Number(range) * 864e5;
     return okQ && okR;
   });
@@ -607,7 +621,7 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
           <option value="7">7 ימים אחרונים</option>
           <option value="30">30 ימים אחרונים</option>
         </select>
-        <Button size="sm" variant="outline" onClick={() => downloadCsv("diagnoses.csv", [["שם", "מייל", "נטיות מובילות", "תאריך", "הערה"], ...list.map((r) => [r.full_name, r.email, r.top_codes.join(" "), fmt(r.created_at), r.admin_note])])}>
+        <Button size="sm" variant="outline" onClick={() => downloadCsv("diagnoses.csv", [["שם", "מייל", "טלפון", "נטיות מובילות", "תאריך", "הערה"], ...list.map((r) => [r.full_name, r.email, r.phone, r.top_codes.join(" "), fmt(r.created_at), r.admin_note])])}>
           <Download className="h-4 w-4" /> ייצוא לאקסל
         </Button>
       </div>
@@ -626,6 +640,7 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
             <button className="text-right" onClick={() => setOpen(open === d.id ? null : d.id)} aria-expanded={open === d.id}>
               <p className="text-sm font-semibold">{d.full_name}</p>
               <p dir="ltr" className="text-right text-xs text-muted-foreground">{d.email}</p>
+              {d.phone && <p dir="ltr" className="text-right text-xs text-muted-foreground">{d.phone}</p>}
               <p className="mt-1 text-xs text-muted-foreground">{fmt(d.created_at)}</p>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                 <span
@@ -634,7 +649,7 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
                   {d.payment_status === "paid" ? "שולם" : "ממתין לתשלום"}
                 </span>
                 <span className="text-muted-foreground">
-                  {d.selected_plan === "report_with_consultation" ? "אבחון + ייעוץ (90 ₪)" : d.selected_plan === "report_only" ? "רק אבחון (45 ₪)" : "טרם נבחר מסלול"}
+                  {d.selected_plan === "report_with_consultation" ? "אבחון + ייעוץ טלפוני/זום (90 ₪)" : d.selected_plan === "report_only" ? "רק אבחון (45 ₪)" : "טרם נבחר מסלול"}
                   {" · "}
                   {d.payment_method === "bit" ? "ביט" : d.payment_method === "bank_transfer" ? "העברה בנקאית" : "—"}
                 </span>
