@@ -91,6 +91,18 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /* Larger, comfortable reading size on computers */
+  @media (min-width: 1024px) {
+    html {
+      font-size: 17px;
+    }
+  }
+  @media (min-width: 1536px) {
+    html {
+      font-size: 18px;
+    }
+  }
+
   body {
     background-color: var(--color-background);
     background-image: var(--gradient-hero);

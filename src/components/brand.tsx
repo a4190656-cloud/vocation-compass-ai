@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { MessageCircle, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const brainAsset = { url: "/brain-icon.webp" };
@@ -76,7 +77,7 @@ function WhatsAppBubble() {
         aria-label="יצירת קשר"
         className="flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-lg transition-transform hover:scale-105"
       >
-        <span aria-hidden="true">{open ? "✕" : "📞"}</span>
+        {open ? <X className="h-5 w-5" aria-hidden="true" /> : <MessageCircle className="h-5 w-5" aria-hidden="true" />}
         <span>יצירת קשר</span>
       </button>
     </div>

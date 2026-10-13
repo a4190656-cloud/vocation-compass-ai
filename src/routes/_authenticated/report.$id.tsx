@@ -35,7 +35,7 @@ function Report() {
   });
 
   const back = (
-    <div className="mx-auto max-w-3xl px-4 pt-4 print:hidden">
+    <div className="mx-auto max-w-3xl px-4 pt-4 lg:max-w-5xl print:hidden">
       <Link to="/admin" className="inline-flex items-center gap-1 text-sm text-primary underline underline-offset-4">
         <ArrowRight className="h-4 w-4" /> חזרה לאזור הניהול
       </Link>

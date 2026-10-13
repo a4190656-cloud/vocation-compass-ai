@@ -77,7 +77,7 @@ const SECTIONS: { title: string; body: string[] }[] = [
 
 function Terms() {
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-16">
+    <main className="mx-auto w-full max-w-3xl px-4 lg:max-w-5xl lg:px-8 pb-16">
       <BrandHeader />
       <h1 className="mt-4 font-[family-name:var(--font-display)] text-3xl font-black">
         תנאי <span className="text-gradient">שימוש</span>

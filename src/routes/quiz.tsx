@@ -177,7 +177,7 @@ function Quiz() {
   const canProceed = (answers[question?.id ?? ""] ?? []).length > 0;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 pb-24 pt-2">
+    <main className="mx-auto w-full max-w-2xl px-4 lg:max-w-3xl pb-24 pt-2">
       <BrandHeader />
       <div className="glass sticky top-4 z-10 px-4 py-3">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
