@@ -13,24 +13,15 @@ export const PLANS: Record<Plan, { title: string; price: number; desc: string }>
   report_only: {
     title: "אבחון תעסוקתי ממוחשב מקצועי",
     price: 45,
-    desc: "פתיחת דוח תוצאות מלא ומפורט לפי מודל הולנד (RIASEC)",
+    desc: "פתיחת דוח תוצאות מפורט ומלא לפי מודל הולנד (RIASEC)",
   },
   report_with_consultation: {
     title: "אבחון + ייעוץ אישי מקצועי",
     price: 90,
-    desc: "דוח תוצאות מפורט + פגישת ייעוץ אישית ומקצועית",
+    desc: "דוח תוצאות מלא + שיחת ייעוץ אישית ומקצועית (ייעוץ טלפוני או בזום)",
   },
 };
 export const METHOD_LABEL: Record<Method, string> = { bit: "ביט", bank_transfer: "העברה בנקאית" };
-
-/** פרטי תשלום — יש לעדכן לפרטים האמיתיים */
-const BIT_PHONE = OWNER.phone;
-const BANK = {
-  bank: "[שם הבנק]",
-  branch: "[מספר סניף]",
-  account: "[מספר חשבון]",
-  holder: "[שם בעל החשבון]",
-};
 
 interface Access {
   payment_status: string;
@@ -122,9 +113,9 @@ function Checkout({
   };
 
   const price = plan ? PLANS[plan].price : 0;
-  const msg = `היי, סיימתי את מבדק המצפן התעסוקתי, מצרף אסמכתא על סך ${price} ₪ עבור ${name}`;
+  const msg = plan && method ? `היי, סיימתי את אבחון מצפן התעסוקתי.\nשם: ${name}\nמסלול: ${PLANS[plan].title} (${price} ₪)\nאמצעי תשלום: ${METHOD_LABEL[method]}\nאשמח לקבל פרטי תשלום ולשלוח אסמכתא.` : "";
   const waUrl = `https://wa.me/972${OWNER.phone.slice(1)}?text=${encodeURIComponent(msg)}`;
-  const mailUrl = `mailto:${OWNER.email}?subject=${encodeURIComponent(`אסמכתא תשלום - מצפן - ${name}`)}&body=${encodeURIComponent(msg)}`;
+  const mailUrl = `mailto:${OWNER.email}?subject=${encodeURIComponent(`בקשת פרטי תשלום - מצפן - ${name}`)}&body=${encodeURIComponent(msg)}`;
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-2 lg:max-w-4xl lg:px-8">
@@ -141,7 +132,7 @@ function Checkout({
             <Lock className="h-7 w-7 text-primary" />
           </span>
           <h1 className="mt-3 text-2xl font-black">התוצאות שלך מוכנות!</h1>
-          <p className="mt-2 text-sm text-muted-foreground">הגישה תיפתח מיידית עם אישור התשלום.</p>
+          <p className="mt-2 text-sm text-muted-foreground">הגישה תפתח מיידית ברגע שאישור התשלום יאושר על ידי הצוות (ברענון הדף).</p>
         </div>
       </section>
 
@@ -211,24 +202,8 @@ function Checkout({
               </p>
             </div>
 
-            <div className="rounded-2xl border border-border bg-white/5 p-4 text-sm leading-loose">
-              {method === "bit" ? (
-                <>
-                  יש להעביר <b>{price} ₪</b> בביט למספר: <span dir="ltr" className="font-bold">{BIT_PHONE}</span>
-                </>
-              ) : (
-                <>
-                  <div>בנק: <b>{BANK.bank}</b></div>
-                  <div>סניף: <b>{BANK.branch}</b></div>
-                  <div>מספר חשבון: <b dir="ltr">{BANK.account}</b></div>
-                  <div>שם בעל החשבון: <b>{BANK.holder}</b></div>
-                  <div>סכום: <b>{price} ₪</b></div>
-                </>
-              )}
-            </div>
-
             <div>
-              <h3 className="font-bold">שליחת אסמכתא</h3>
+              <h3 className="font-bold">ליצירת קשר לקבלת פרטי תשלום ושליחת אסמכתא</h3>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <a
                   href={waUrl}
@@ -237,13 +212,13 @@ function Checkout({
                   className="flex items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-bold text-white"
                   style={{ backgroundColor: "#25D366" }}
                 >
-                  <MessageCircle className="h-5 w-5" /> שליחה בוואטסאפ
+                  <MessageCircle className="h-5 w-5" /> ליצירת קשר לקבלת פרטי תשלום ושליחת אסמכתא
                 </a>
                 <a
                   href={mailUrl}
                   className="flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-bold text-primary-foreground"
                 >
-                  <Mail className="h-5 w-5" /> שליחה במייל
+                  <Mail className="h-5 w-5" /> יצירת קשר במייל
                 </a>
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
@@ -252,7 +227,7 @@ function Checkout({
             </div>
 
             <p role="status" className="rounded-2xl bg-primary/10 p-4 text-sm font-semibold text-primary">
-              תודה רבה! לאחר קבלת האסמכתא, אנו נאשר את התשלום ותוכל לצפות בתוצאות המלאות מיד (בעת כניסה או רענון הדף).
+              תודה רבה! לאחר קבלת האסמכתא נאשר את התשלום, והתוצאות המלאות ייפתחו לצפייה מיידית ברענון הדף.
             </p>
 
             <div className="flex flex-wrap gap-2">
