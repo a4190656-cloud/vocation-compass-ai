@@ -49,8 +49,12 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          payment_method: string | null
+          payment_status: string
           scores: Json
+          selected_plan: string | null
           top_codes: string[]
+          unlocked_at: string | null
         }
         Insert: {
           admin_note?: string
@@ -59,8 +63,12 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          payment_method?: string | null
+          payment_status?: string
           scores?: Json
+          selected_plan?: string | null
           top_codes?: string[]
+          unlocked_at?: string | null
         }
         Update: {
           admin_note?: string
@@ -69,8 +77,12 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          payment_method?: string | null
+          payment_status?: string
           scores?: Json
+          selected_plan?: string | null
           top_codes?: string[]
+          unlocked_at?: string | null
         }
         Relationships: []
       }
@@ -151,6 +163,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      choose_diagnosis_plan: {
+        Args: { _id: string; _method: string; _plan: string }
+        Returns: boolean
+      }
+      get_diagnosis_access: {
+        Args: { _id: string }
+        Returns: {
+          payment_method: string
+          payment_status: string
+          selected_plan: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

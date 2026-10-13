@@ -111,7 +111,9 @@ function Quiz() {
     const totals = computeRawTotals(finalAnswers);
     const profile = buildProfile(finalAnswers, totals, { skippedCount: finalSkipped.length });
 
+    const diagnosisId = crypto.randomUUID();
     const result = {
+      diagnosisId,
       totals,
       profile,
       user,
@@ -121,6 +123,7 @@ function Quiz() {
 
     if (user) {
       const { error } = await supabase.from("diagnoses").insert({
+        id: diagnosisId,
         full_name: user.name,
         email: user.email,
         scores: {
