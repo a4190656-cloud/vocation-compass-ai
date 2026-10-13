@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandHeader, SiteFooter } from "@/components/brand";
+import { PaywallGate } from "@/components/paywall";
 import {
   RESULT_KEY,
   WHATSAPP_GROUP,
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/results")({
 });
 
 export interface StoredResult {
+  diagnosisId?: string;
   profile: Profile;
   user?: { name: string; email: string } | null;
 }
@@ -64,7 +66,7 @@ function Results() {
   }, [navigate]);
 
   if (!result) return null;
-  return <ResultsView result={result} />;
+  return <PaywallGate result={result} />;
 }
 
 export function ResultsView({ result, admin = false }: { result: StoredResult; admin?: boolean }) {
