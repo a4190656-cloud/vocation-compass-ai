@@ -58,6 +58,10 @@ interface ResultRow {
   created_at: string;
   deleted_at: string | null;
   admin_note: string;
+  selected_plan: string | null;
+  payment_method: string | null;
+  payment_status: string;
+  unlocked_at: string | null;
 }
 interface ActivityRow {
   id: string;
@@ -154,7 +158,7 @@ function Admin() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("diagnoses")
-        .select("id, full_name, email, top_codes, created_at, deleted_at, admin_note")
+        .select("id, full_name, email, top_codes, created_at, deleted_at, admin_note, selected_plan, payment_method, payment_status, unlocked_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as ResultRow[];
@@ -479,7 +483,14 @@ function ReviewsTab({ rows, loading, log, refreshAll }: { rows: ReviewRow[]; loa
             <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>ביטול בחירה</Button>
           </div>
         )}
-        <p className="text-xs text-muted-foreground">מוצגות {list.length} מתוך {rows.length}</p>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="סינון לפי סטטוס תשלום">
+        {([["all", "הכל"], ["pending", "ממתינים לאישור"], ["paid", "שולמו"]] as const).map(([k, l]) => (
+          <Button key={k} size="sm" variant={pay === k ? "hero" : "outline"} onClick={() => setPay(k)} aria-pressed={pay === k}>
+            {l} ({k === "all" ? rows.length : rows.filter((r) => r.payment_status === k).length})
+          </Button>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">מוצגות {list.length} מתוך {rows.length}</p>
       </div>
 
       {list.map((r) => {
@@ -553,8 +564,21 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
   const [range, setRange] = useState<"all" | "7" | "30">("all");
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<string | null>(null);
+  const [pay, setPay] = useState<"all" | "pending" | "paid">("all");
+
+  const approvePayment = async (r: ResultRow) => {
+    const { error } = await supabase
+      .from("diagnoses")
+      .update({ payment_status: "paid", unlocked_at: new Date().toISOString() } as never)
+      .eq("id", r.id);
+    if (error) { toast.error("הפעולה נכשלה"); return; }
+    toast.success("התשלום אושר והצפייה נפתחה");
+    await log("אישור תשלום", "result", r.full_name, r.id);
+    refreshAll();
+  };
 
   const list = rows.filter((r) => {
+    if (pay !== "all" && r.payment_status !== pay) return false;
     const s = q.trim().toLowerCase();
     const okQ = !s || r.full_name.toLowerCase().includes(s) || r.email.toLowerCase().includes(s);
     const okR = range === "all" || +new Date(r.created_at) > Date.now() - Number(range) * 864e5;
@@ -594,6 +618,13 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
           <Download className="h-4 w-4" /> ייצוא לאקסל
         </Button>
       </div>
+      <div className="flex flex-wrap gap-2" role="group" aria-label="סינון לפי סטטוס תשלום">
+        {([["all", "הכל"], ["pending", "ממתינים לאישור"], ["paid", "שולמו"]] as const).map(([k, l]) => (
+          <Button key={k} size="sm" variant={pay === k ? "hero" : "outline"} onClick={() => setPay(k)} aria-pressed={pay === k}>
+            {l} ({k === "all" ? rows.length : rows.filter((r) => r.payment_status === k).length})
+          </Button>
+        ))}
+      </div>
       <p className="text-xs text-muted-foreground">מוצגות {list.length} מתוך {rows.length}</p>
 
       {list.map((d) => (
@@ -603,8 +634,25 @@ function ResultsTab({ rows, loading, log, refreshAll }: { rows: ResultRow[]; loa
               <p className="text-sm font-semibold">{d.full_name}</p>
               <p dir="ltr" className="text-right text-xs text-muted-foreground">{d.email}</p>
               <p className="mt-1 text-xs text-muted-foreground">{fmt(d.created_at)}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                <span
+                  className={`rounded-full px-2.5 py-0.5 font-bold ${d.payment_status === "paid" ? "bg-[#25D366]/20 text-[#25D366]" : "bg-[var(--gold)]/20 text-[var(--gold)]"}`}
+                >
+                  {d.payment_status === "paid" ? "שולם" : "ממתין לתשלום"}
+                </span>
+                <span className="text-muted-foreground">
+                  {d.selected_plan === "report_with_consultation" ? "אבחון + ייעוץ (90 ₪)" : d.selected_plan === "report_only" ? "רק אבחון (45 ₪)" : "טרם נבחר מסלול"}
+                  {" · "}
+                  {d.payment_method === "bit" ? "ביט" : d.payment_method === "bank_transfer" ? "העברה בנקאית" : "—"}
+                </span>
+              </div>
             </button>
             <div className="flex flex-wrap gap-2">
+              {d.payment_status !== "paid" && (
+                <Button size="sm" className="bg-[#25D366] text-white hover:bg-[#25D366]/90" onClick={() => approvePayment(d)}>
+                  אשר תשלום ופתח צפייה
+                </Button>
+              )}
               <Button size="sm" variant="hero" asChild>
                 <Link to="/report/$id" params={{ id: d.id }}>דוח מלא</Link>
               </Button>
