@@ -45,7 +45,7 @@ function ResetPassword() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-md px-4 pb-16">
+    <main className="mx-auto w-full max-w-md px-4 lg:max-w-lg pb-16">
       <BrandHeader />
       <section className="glass-strong mt-6 p-6">
         <h1 className="text-2xl font-bold">סיסמה חדשה</h1>

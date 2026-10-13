@@ -128,7 +128,7 @@ export function ResultsView({ result, admin = false }: { result: StoredResult; a
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-20 pt-2">
+    <main className="mx-auto w-full max-w-3xl px-4 lg:max-w-5xl lg:px-8 pb-20 pt-2">
       {!admin && <BrandHeader />}
       {!admin && (
         <section role="status" className="glass-strong mb-6 p-5 text-center">

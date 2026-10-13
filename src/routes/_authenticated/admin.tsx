@@ -233,7 +233,7 @@ function Admin() {
   const ctx = { log, refreshAll };
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 pb-20">
+    <main className="mx-auto w-full max-w-5xl px-4 lg:px-8 2xl:max-w-6xl pb-20">
       <BrandHeader />
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>

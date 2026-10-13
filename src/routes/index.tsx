@@ -167,7 +167,7 @@ function Home() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-16">
+    <main className="mx-auto w-full max-w-3xl px-4 lg:max-w-5xl lg:px-8 pb-16">
       <BrandHeader />
       {settings.data?.announcement && (
         <div role="status" className="glass mt-3 p-3 text-center text-sm font-semibold text-primary">
