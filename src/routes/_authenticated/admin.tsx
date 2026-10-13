@@ -483,13 +483,6 @@ function ReviewsTab({ rows, loading, log, refreshAll }: { rows: ReviewRow[]; loa
             <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>ביטול בחירה</Button>
           </div>
         )}
-        <div className="flex flex-wrap gap-2" role="group" aria-label="סינון לפי סטטוס תשלום">
-        {([["all", "הכל"], ["pending", "ממתינים לאישור"], ["paid", "שולמו"]] as const).map(([k, l]) => (
-          <Button key={k} size="sm" variant={pay === k ? "hero" : "outline"} onClick={() => setPay(k)} aria-pressed={pay === k}>
-            {l} ({k === "all" ? rows.length : rows.filter((r) => r.payment_status === k).length})
-          </Button>
-        ))}
-      </div>
       <p className="text-xs text-muted-foreground">מוצגות {list.length} מתוך {rows.length}</p>
       </div>
 
