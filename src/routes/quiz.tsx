@@ -21,13 +21,13 @@ const PENDING_KEY = "riasec-pending-save-v1";
 
 /** שמירת אבחון עם ניסיונות חוזרים */
 export async function saveDiagnosis(row: Record<string, unknown>, attempts = 3): Promise<boolean> {
-  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-  console.log("[diagnosis] saving", { id: row.id, hasUrl: Boolean(url), hasKey: Boolean(key), keyPrefix: key?.slice(0, 14) });
+  const url = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
+  const key = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] as string | undefined;
+  console.log("[diagnosis] saving", { id: row["id"], hasUrl: Boolean(url), hasKey: Boolean(key), keyPrefix: key?.slice(0, 14) });
   for (let i = 0; i < attempts; i++) {
     const { error } = await supabase.from("diagnoses").insert(row as never);
     if (!error || error.code === "23505") {
-      console.log("[diagnosis] saved", row.id);
+      console.log("[diagnosis] saved", row["id"]);
       return true;
     }
     console.error(`[diagnosis] save failed (attempt ${i + 1})`, error);
